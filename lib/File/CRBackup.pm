@@ -297,7 +297,8 @@ backup process will just continue the rsync process.
 
 =head2 Maintenance of histories/history levels
 
-TARGET/hist.* are level-1 backups. Each backup run will produce a new history:
+TARGET/hist.* are level-1 backup histories. Each backup run will produce a new
+history:
 
  TARGET/hist.<timestamp1>
  TARGET/hist.<timestamp2> # produced by the next backup
