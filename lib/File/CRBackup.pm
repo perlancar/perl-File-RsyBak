@@ -358,12 +358,13 @@ number of histories).
 
 =item * extra_dir => BOOL
 
-If set to true, then backup(source => '/a', target => '/backup/a') will create
+If set to 1, then backup(source => '/a', target => '/backup/a') will create
 another 'a' directory, i.e. /backup/a/current/a. Otherwise, contents of a/ will
 be directly copied under /backup/a/current/.
 
-Will always be set to true if source is more than one, but default to false if
-source is a single directory.
+Will always be set to 1 if source is more than one, but default to 0 if source
+is a single directory. You can set this to 1 to so that behaviour when there is
+a single source is the same as behaviour when there are several sources.
 
 =item * backup => BOOL (default 1)
 
@@ -386,9 +387,9 @@ cherry-picking. At first we used B<rdiff-backup>, but turned out it was not very
 robust as the script chose to exit on many kinds of non-fatal errors instead of
 ignoring the errors and continuning backup. It was also very slow: on a server
 with hundreds of accounts with millions of files, backup process often took 12
-hours or more. After evaluating several other solutions, we found out that
-nothing beats the raw performance of rsync/cp. And thus we design a simple
-backup system based on them.
+hours or more. After evaluating several other solutions, we realized that
+nothing beats the raw performance of rsync/cp. Thus we designed a simple backup
+system based on them.
 
 
 =head1 TODO
