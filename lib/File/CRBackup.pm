@@ -1,0 +1,409 @@
+package File::CRBackup;
+# ABSTRACT: Cp+rsync-based filesystem backup with history levels and hardlinks
+
+use 5.010;
+use strict;
+use warnings;
+use Log::Any '$log';
+require Exporter;
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(backup);
+
+use File::chdir;
+use File::Flock;
+use File::Path  qw(make_path);
+use File::Which qw(which);
+use POSIX;
+use String::ShellQuote;
+#use Taint::Util;
+
+sub backup {
+    my %args = @_;
+
+    # XXX schema
+    my $source    = $args{source} or die "Please specify source\n";
+    my @sources   = ref($source) eq 'ARRAY' ? @$source : ($source);
+    for (@sources) {
+        s!/+$!!;
+        lstat $_;
+        (-e _) or die "Source path `$_` doesn't exist\n";
+    }
+    my $target    = $args{target} or die "Please specify target\n";
+    $target       =~ s!/+$!!;
+    my $histories = $args{histories} or die "Please specify histories\n";
+    ref($histories) eq 'ARRAY' or die "histories must be array\n";
+    my $backup    = $args{backup} // 1;
+    my $rotate    = $args{rotate} // 1;
+    my $extra_dir = $args{extra_dir} || (@sources > 1);
+
+    # sanity
+    my $cp_path    = which("cp")    or die "Can't find cp in PATH\n";
+    my $rsync_path = which("rsync") or die "Can't find rsync in PATH\n";
+
+    unless (-d $target) {
+        $log->debugf("Creating target directory %s ...", $target);
+        make_path($target)
+            or die "Can't create target directory $target: $!\n";
+    }
+
+    die "Can't lock $target, perhaps another backup process is running\n"
+        unless lock("$target/.lock", undef, "nonblocking");
+
+    if ($backup) {
+        _backup(\@sources, $target, $extra_dir);
+    }
+
+    if ($rotate) {
+        _rotate($target, $histories);
+    }
+
+    unlock("$target/.lock");
+}
+
+sub _backup {
+    my ($sources, $target, $extra_dir) = @_;
+    $log->infof("Starting backup %s ==> %s ...", $sources, $target);
+    my $cmd;
+    if (-e "$target/current" && !(-e "$target/.tmp")) {
+        $cmd = join(
+            "",
+            "nice -n19 cp -al ",
+            shell_quote("$target/current"),
+            " ", shell_quote("$target/.tmp")
+        );
+        $log->debug("system(): $cmd");
+        system $cmd;
+	$log->warn("cp TARGET/current ==> TARGET/.tmp didn't succeed ($?)".
+                       ", please check") if $?;
+    }
+    $cmd = join(
+        "",
+        "nice -n19 rsync -a --del --force ",
+        map({ shell_quote($_), ($extra_dir || !(-d $_) ? "" : "/"), " " }
+                @$sources),
+        shell_quote("$target/.tmp/"),
+    );
+    $log->debug("system(): $cmd");
+    system $cmd;
+    $log->warn("rsync SOURCE ==> TARGET/.tmp didn't succeed ($?)".
+                   ", please recheck") if $?;
+
+    # but continue anyway, half backups are better than nothing
+
+    if (-e "$target/current") {
+        $log->debug("touch $target/.current.timestamp ...");
+        system "touch $target/.current.timestamp";
+        my @st     = stat(".current.timestamp");
+        my $tstamp = POSIX::strftime(
+            "%Y-%m-%d\@%H:%M:%S+00",
+            gmtime( $st[9] || time() ));
+        $log->debug("rename $target/current ==> $target/hist.$tstamp ...");
+        rename "$target/current", "$target/hist.$tstamp";
+    }
+
+    $log->debug("rename $target/.tmp ==> current ...");
+    rename "$target/.tmp", "$target/current";
+
+    $log->infof("Finished backup %s ==> %s", $sources, $target);
+}
+
+
+sub _rotate {
+    my ($target, $histories) = @_;
+    $log->infof("Rotating backup histories in %s (%s) ...",
+                $target, $histories);
+
+    local $CWD = $target; # throws exception when failed
+
+    my $now = time();
+    for my $level (1 .. @$histories) {
+        my $is_highest_level  = $level == @$histories;
+        my $prefix            = "hist" . ($level == 1 ? '' : $level);
+        my $prefix_next_level = "hist" . ($level + 1);
+        my $n                 = $histories->[$level - 1];
+        my $moved             = 0;
+
+        if ($n > 0) {
+            $log->debug("Only keeping $n level-$level histories ...");
+            my @f = reverse sort grep { !/\.tmp$/ } glob "$prefix.*";
+            #untaint for @f;
+            my $any_tagged = (grep {/t$/} @f) ? 1 : 0;
+            for my $f (@f[ $n .. @f - 1 ]) {
+                my ($st, $tagged) = $f =~ /[^.]+\.(.+?)(t)?$/;
+                my $f2 = "$prefix_next_level.$st";
+                if (!$is_highest_level &&
+                        !$moved && ($tagged || !$any_tagged)) {
+                    $log->debug("Moving history level: $f -> $f2");
+                    rename $f, $f2;
+                    $moved++;
+                    if ($f ne $f[0]) {
+                        rename $f[0], "$f[0]t";
+                    }
+                } else {
+                    $log->debug("Removing history: $f ...");
+                    system "nice -n19 rm -rf " . shell_quote($f);
+                }
+            }
+        } else {
+            $n = -$n;
+            $log->debug("Only keeping $n day(s) of level-$level histories ...");
+            my @f = reverse sort grep { !/\.tmp$/ } glob "$prefix.*";
+            my $any_tagged = ( grep {/t$/} @f ) ? 1 : 0;
+            for my $f (@f) {
+                my ($st, $tagged) = $f =~ /[^.]+\.(.+?)(t)?$/;
+                my $f2 = "$prefix_next_level.$st";
+                my $t;
+                $st =~ /(\d\d\d\d)-(\d\d)-(\d\d)\@(\d\d):(\d\d):(\d\d)\+00/;
+                $t = timegm($6, $5, $4, $3, $2 - 1, $1) if $1;
+                unless ($st && $t) {
+                    $log->warn("Wrong format of history, ignored: $f");
+                    next;
+                }
+                if ($t > $now) {
+                    $log->warn("History in the future, ignored: $f");
+                    next;
+                }
+                my $delta = ($now - $t) / 86400;
+                if ($delta > $n) {
+                    if (!$is_highest_level &&
+                            !$moved && ( $tagged || !$any_tagged)) {
+                        $log->debug("Moving history level: $f -> $f2");
+                        rename $f, $f2;
+                        $moved++;
+                        if ($f ne $f[0]) {
+                            rename $f[0], "$f[0]t";
+                        }
+                    } else {
+                        $log->debug("Removing history: $f ...");
+                        system "nice -n19 rm -rf " . shell_quote($f);
+                    }
+                }
+            }
+        }
+    }
+}
+
+1;
+__END__
+
+=head1 SYNOPSIS
+
+In daily-backup script:
+
+ #!/usr/bin/perl
+ use File::CRBackup qw(backup);
+ use Log::Any::App;
+ backup(
+     source    => '/path/to/mydata',
+     target    => '/backup/mydata',
+     histories => [7, 4, 3],         # 7 days, 4 weeks, 3 months
+ );
+
+=head1 DESCRIPTION
+
+This module utilizes two mature, dependable Unix command-line utilities, B<cp>
+and B<rsync>, to create a filesystem backup system. Some characteristics of this
+backup system:
+
+=over 4
+
+=item * Supports backup histories and history levels
+
+For example, you can create 7 level-1 backup histories (equals 7 days worth of
+history if you run backup once daily), 4 level-2 backup histories (roughly
+equals 4 weeks) and 3 level-3 backup histories (rougly equals 3 months). The
+number of levels and history per levels are customizable.
+
+=item * Backups are not compressed/archived ("tar"-ed)
+
+They are just verbatim copies (produced by L<cp -a>, or L<rsync -a>) of source
+directory. The upside of this is ease of cherry-picking (taking/restoring
+individual files from backup). The downside is lack of compression and the
+backup not being a single archive file.
+
+This is because rsync needs two real directory trees when comparing. Perhaps
+when rsync supports tar virtual filesystem in the future...
+
+=item * Hardlinks are used between backup histories to save disk space
+
+This way, we can maintain several backup histories without wasting too much
+space duplicating data when there are not a lot of differences among them.
+
+=item * High performance
+
+Rsync and cp are implemented in C and have been optimized for a long time. B<rm>
+is also used instead of Perl implementation File::Path::remove_path.
+
+=item * Unix-specific
+
+There are ports of cp, rm, and rsync on Windows, but this module hasn't been
+tested on those platforms.
+
+=back
+
+This module uses Log::Any logging framework.
+
+
+=head1 HOW IT WORKS
+
+=head2 First-time backup
+
+First, we lock target directory to prevent other backup process to interfere:
+
+ mkdir -p TARGET
+ flock    TARGET/.lock
+
+Then we copy source to temporary directory:
+
+ cp -a    SRC            TARGET/.tmp
+
+If copy finishes successfully, we rename temporary directory to final directory
+'current':
+
+ rename   TARGET/.tmp    TARGET/current
+ touch    TARGET/.current.timestamp
+
+If copy fails in the middle, TARGET/.tmp will still be lying around and the next
+backup process will try to rsync it (to be more efficient):
+
+ rsync    SRC            TARGET/.tmp
+
+Finally, we remove lock:
+
+ unlock   TARGET/.lock
+
+=head2 Subsequent backups (after TARGET/current exists)
+
+First, we lock target directory to prevent other backup process to interfere:
+
+ flock    TARGET/.lock
+
+Then we copy current to temporary directory, using hardlinks when possible:
+
+ cp -la   TARGET/current TARGET/.tmp
+
+Then we rsync source to target directory:
+
+ rsync    SRC            TARGET/.tmp
+
+If rsync finishes successfully, we rename target directories:
+
+ rename   TARGET/current TARGET/hist.<timestamp>
+ rename   TARGET/.tmp    TARGET/current
+ touch    TARGET/.current.timestamp
+
+If rsync fails in the middle, TARGET/.tmp will be lying around and the next
+backup process will just continue the rsync process.
+
+=head2 Maintenance of histories/history levels
+
+TARGET/hist.* are level-1 backups. Each backup run will produce a new history:
+
+ TARGET/hist.<timestamp1>
+ TARGET/hist.<timestamp2> # produced by the next backup
+ TARGET/hist.<timestamp3> # and the next ...
+ TARGET/hist.<timestamp4> # and so on ...
+ TARGET/hist.<timestamp5>
+ ...
+
+You can specify the number of histories (or number of days) to maintain. If the
+number of histories exceeds the limit, older histories will be deleted, or one
+will be promoted to the next level, if a higher level is specified.
+
+For example, with B<histories> being set to [7, 4, 3], after
+TARGET/hist.<timestamp8> is created, TARGET/hist.<timestamp1> will be promoted
+to level 2:
+
+ rename TARGET/hist.<timestamp1> TARGET/hist2.<timestamp1>
+
+TARGET/hist2.* directories are level-2 backup histories. After a while, they
+will also accumulate:
+
+ TARGET/hist2.<timestamp1>
+ TARGET/hist2.<timestamp8>
+ TARGET/hist2.<timestamp15>
+ TARGET/hist2.<timestamp22>
+
+When TARGET/hist2.<timestamp29> arrives, TARGET/hist2.<timestamp1> will be
+promoted to level 3: TARGET/hist3.<timestamp1>. After a while, level-3 backup
+histories too will accumulate:
+
+ TARGET/hist3.<timestamp1>
+ TARGET/hist3.<timestamp29>
+ TARGET/hist3.<timestamp57>
+
+Finally, TARGET/hist3.<timestamp1> will be deleted after
+TARGET/hist3.<timestamp85> comes along.
+
+
+=head1 FUNCTIONS
+
+None of the functions are exported by default.
+
+=head2 backup(%args)
+
+Arguments (those marked with C<*> are required):
+
+=over 4
+
+=item * source* => PATH or [PATH, ...]
+
+=item * target* => PATH
+
+=item * histories* => [NUM, ...]
+
+Specifies number of backup histories to keep for level 1, 2, and so on. If
+number is negative, specifies number of days to keep instead (regardless of
+number of histories).
+
+=item * extra_dir => BOOL
+
+If set to true, then backup(source => '/a', target => '/backup/a') will create
+another 'a' directory, i.e. /backup/a/current/a. Otherwise, contents of a/ will
+be directly copied under /backup/a/current/.
+
+Will always be set to true if source is more than one, but default to false if
+source is a single directory.
+
+=item * backup => BOOL (default 1)
+
+Whether to do backup or not. If backup=1 and rotate=0 then will only create new
+backup without rotating histories.
+
+=item * rotate => BOOL (default 1)
+
+Whether to rotate histories or not (which is done after backup). If backup=0 and
+rotate=1 then will only do history rotating.
+
+=back
+
+
+=head1 HISTORY
+
+This module came out of the Spanel hosting control panel project. We needed a
+daily backup system for shared hosting accounts that supports histories and
+cherry-picking. At first we used B<rdiff-backup>, but turned out it was not very
+robust as the script chose to exit on many kinds of non-fatal errors instead of
+ignoring the errors and continuning backup. It was also very slow: on a server
+with hundreds of accounts with millions of files, backup process often took 12
+hours or more. After evaluating several other solutions, we found out that
+nothing beats the raw performance of rsync/cp. And thus we design a simple
+backup system based on them.
+
+
+=head1 TODO
+
+* Allow extra cp & rsync options
+
+* Allow ionice etc instead of just nice -n19
+
+
+=head1 SEE ALSO
+
+L<File::Backup>
+
+L<File::Rotate::Backup>
+
+=cut
+
+1;
