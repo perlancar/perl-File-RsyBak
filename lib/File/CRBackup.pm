@@ -50,7 +50,13 @@ sub backup {
         unless lock("$target/.lock", undef, "nonblocking");
 
     if ($backup) {
-        _backup(\@sources, $target, $extra_dir);
+        _backup(
+            \@sources, $target,
+            {
+                extra_dir        => $extra_dir,
+                extra_cp_opts    => $args{extra_cp_opts},
+                extra_rsync_opts => $args{extra_rsync_opts},
+            });
     }
 
     if ($rotate) {
@@ -61,13 +67,15 @@ sub backup {
 }
 
 sub _backup {
-    my ($sources, $target, $extra_dir) = @_;
+    my ($sources, $target, $opts) = @_;
     $log->infof("Starting backup %s ==> %s ...", $sources, $target);
     my $cmd;
     if (-e "$target/current" && !(-e "$target/.tmp")) {
         $cmd = join(
             "",
             "nice -n19 cp -al ",
+            ($opts{extra_cp_opts} ? map { shell_quote($_) }
+                 @{$opts{extra_cp_opts}} : ()),
             shell_quote("$target/current"),
             " ", shell_quote("$target/.tmp")
         );
@@ -79,7 +87,9 @@ sub _backup {
     $cmd = join(
         "",
         "nice -n19 rsync -a --del --force ",
-        map({ shell_quote($_), ($extra_dir || !(-d $_) ? "" : "/"), " " }
+        ($opts{extra_rsync_opts} ? map { shell_quote($_) }
+             @{$opts{extra_rsync_opts}} : ()),
+        map({ shell_quote($_), ($opts{extra_dir} || !(-d $_) ? "" : "/"), " " }
                 @$sources),
         shell_quote("$target/.tmp/"),
     );
@@ -377,6 +387,17 @@ backup without rotating histories.
 Whether to rotate histories or not (which is done after backup). If backup=0 and
 rotate=1 then will only do history rotating.
 
+=item * extra_cp_opts => ARRAYREF (default none)
+
+Extra options to pass to B<cp> command when doing backup. Note that the options
+will be shell quoted.
+
+=item * extra_rsync_opts => ARRAYREF (default none)
+
+Extra options to pass to B<rsync> command when doing backup. Note that the
+options will be shell quoted, so you should pass it unquoted, e.g. ['--exclude',
+'/Program Files'].
+
 =back
 
 
@@ -394,8 +415,6 @@ system based on them.
 
 
 =head1 TODO
-
-* Allow extra cp & rsync options
 
 * Allow ionice etc instead of just nice -n19
 
