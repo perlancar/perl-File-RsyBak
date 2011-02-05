@@ -74,8 +74,8 @@ sub _backup {
         $cmd = join(
             "",
             "nice -n19 cp -al ",
-            ($opts{extra_cp_opts} ? map { shell_quote($_) }
-                 @{$opts{extra_cp_opts}} : ()),
+            ($opts->{extra_cp_opts} ? map { shell_quote($_), " " }
+                 @{$opts->{extra_cp_opts}} : ()),
             shell_quote("$target/current"),
             " ", shell_quote("$target/.tmp")
         );
@@ -87,9 +87,10 @@ sub _backup {
     $cmd = join(
         "",
         "nice -n19 rsync -a --del --force ",
-        ($opts{extra_rsync_opts} ? map { shell_quote($_) }
-             @{$opts{extra_rsync_opts}} : ()),
-        map({ shell_quote($_), ($opts{extra_dir} || !(-d $_) ? "" : "/"), " " }
+        ($opts->{extra_rsync_opts} ? map { shell_quote($_), " " }
+             @{$opts->{extra_rsync_opts}} : ()),
+        map({ shell_quote($_),
+              ($opts->{extra_dir} || !(-d $_) ? "" : "/"), " " }
                 @$sources),
         shell_quote("$target/.tmp/"),
     );
