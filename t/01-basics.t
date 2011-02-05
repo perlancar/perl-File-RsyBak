@@ -11,7 +11,7 @@ $ENV{PATH} = "/usr/local/bin:/usr/bin:/bin";
 if (!which("cp") || !which("rsync")) {
     plan skip_all => "Can't find cp / rsync";
 } else {
-    plan tests => 6;
+    plan tests => 9;
 }
 
 use File::chdir;
@@ -39,6 +39,15 @@ test_backup(
     n_sources => 2,
     name      => "multiple sources",
 );
+
+test_backup(
+    n_sources             => 1,
+    name                  => "extra_rsync_opts",
+    test_extra_rsync_opts => 1, # currently is tested when n_sources=1
+);
+
+# XXX test rsync_cp_opts
+
 # XXX don't delete if any tests of the above fails
 $CWD = "/";
 
@@ -58,6 +67,10 @@ sub test_backup {
         $bargs{source} = "$tmpdir/src1";
     }
     $bargs{extra_dir} = 1 if $args{extra_dir};
+    if ($args{test_extra_rsync_opts}) {
+        $bargs{extra_rsync_opts} = ['--exclude', '/file1'];
+    }
+
     backup(%bargs);
 
     if ($msource || $args{extra_dir}) {
@@ -66,11 +79,21 @@ sub test_backup {
     } else {
         ok((-f "$tmpdir/target/current/dir1/dir2/file3"),
            "$name (files copied, no extra_dir)");
+
+        if ($args{test_extra_rsync_opts}) {
+            ok(!(-f "$tmpdir/target/current/file1"),
+               "(extra rsync opts, --exclude, in effect)");
+        } else {
+            ok( (-f "$tmpdir/target/current/file1"),
+                "(no extra rsync opts, --exclude, in effect)");
+        }
+
     }
     if ($msource) {
         ok((-f "$tmpdir/target/current/src2/file1"),
            "$name (all sources copied)");
     }
+
 
     # XXX test hardlink, test changing files
 
