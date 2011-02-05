@@ -408,4 +408,3 @@ L<File::Rotate::Backup>
 
 =cut
 
-1;
