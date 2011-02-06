@@ -225,7 +225,7 @@ if you run backup once daily), 4 level-2 backup histories (equals 4 weekly
 histories) and 3 level-3 backup histories (roughly equals 3 monthly histories).
 The number of levels and history per levels are customizable.
 
-=item * Backups are not compressed/archived ("tar"-ed)
+=item * Backups (and histories) are not compressed/archived ("tar"-ed)
 
 They are just verbatim copies (produced by L<cp -a>, or L<rsync -a>) of source
 directory. The upside of this is ease of cherry-picking (taking/restoring
