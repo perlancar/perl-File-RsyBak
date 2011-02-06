@@ -409,15 +409,15 @@ options will be shell quoted, so you should pass it unquoted, e.g. ['--exclude',
 
 =head1 HISTORY
 
-This module came out of the Spanel hosting control panel project. We needed a
-daily backup system for shared hosting accounts that supports histories and
-cherry-picking. At first we used B<rdiff-backup>, but turned out it was not very
-robust as the script chose to exit on many kinds of non-fatal errors instead of
-ignoring the errors and continuning backup. It was also very slow: on a server
-with hundreds of accounts with millions of files, backup process often took 12
-hours or more. After evaluating several other solutions, we realized that
-nothing beats the raw performance of rsync/cp. Thus we designed a simple backup
-system based on them.
+The idea for this module came out in 2006 as part of the Spanel hosting control
+panel project. We need a daily backup system for shared hosting accounts that
+supports histories and cherry-picking. Previously we had been using a
+Python-based script B<rdiff-backup>. It was not very robust, the script chose to
+exit on many kinds of non-fatal errors instead of ignoring the errors and
+continuning backup. It was also very slow: on a server with hundreds of accounts
+with millions of files, backup process often took 12 hours or more. After
+evaluating several other solutions, we realized that nothing beats the raw
+performance of rsync/cp. Thus we designed a simple backup system based on them.
 
 
 =head1 TODO
