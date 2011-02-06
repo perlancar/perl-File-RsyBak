@@ -307,6 +307,10 @@ If rsync finishes successfully, we rename target directories:
 If rsync fails in the middle, TARGET/.tmp will be lying around and the next
 backup process will just continue the rsync process.
 
+Finally, we remove lock:
+
+ unlock   TARGET/.lock
+
 =head2 Maintenance of histories/history levels
 
 TARGET/hist.* are level-1 backup histories. Each backup run will produce a new
