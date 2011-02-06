@@ -220,10 +220,10 @@ backup system:
 
 =item * Supports backup histories and history levels
 
-For example, you can create 7 level-1 backup histories (equals 7 days worth of
-history if you run backup once daily), 4 level-2 backup histories (roughly
-equals 4 weeks) and 3 level-3 backup histories (rougly equals 3 months). The
-number of levels and history per levels are customizable.
+For example, you can create 7 level-1 backup histories (equals 7 daily histories
+if you run backup once daily), 4 level-2 backup histories (equals 4 weekly
+histories) and 3 level-3 backup histories (roughly equals 3 monthly histories).
+The number of levels and history per levels are customizable.
 
 =item * Backups are not compressed/archived ("tar"-ed)
 
