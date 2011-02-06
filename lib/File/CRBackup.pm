@@ -259,7 +259,8 @@ This module uses Log::Any logging framework.
 
 =head2 First-time backup
 
-First, we lock target directory to prevent other backup process to interfere:
+First, we lock target directory to prevent other backup process from
+interfering:
 
  mkdir -p TARGET
  flock    TARGET/.lock
