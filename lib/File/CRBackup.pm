@@ -419,6 +419,7 @@ with millions of files, backup process often took 12 hours or more. After
 evaluating several other solutions, we realized that nothing beats the raw
 performance of rsync/cp. Thus we designed a simple backup system based on them.
 
+First public release of this module is in Feb 2011.
 
 =head1 TODO
 
