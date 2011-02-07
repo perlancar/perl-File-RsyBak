@@ -1,5 +1,5 @@
 package File::CRBackup;
-# ABSTRACT: Cp+rsync-based filesystem backup with history levels and hardlinks
+# ABSTRACT: Backup files/directories with histories, using cp+rsync
 
 use 5.010;
 use strict;
@@ -17,6 +17,32 @@ use POSIX;
 use String::ShellQuote;
 #use Taint::Util;
 
+our %SUBS;
+
+$SUBS{backup} = {
+    _summary          =>
+        'Backup files/directories with histories, using cp+rsync',
+    required_args     => [qw/source target/],
+    args              => {
+        source     => [either   => {of         => ['str*', 'str*[]*'],
+                                    _summary   => 'Director(y|ies) to backup',
+                                    _arg_order => 0,
+                                }],
+        target     => ['str*'   => {_summary   => 'Backup destination',
+                                    _arg_order => 1,
+                                }],
+        histories  => ['array*' => {of         => 'int*',
+                                    _summary   => 'Histories/history levels',
+                                    default    => [-7, 4, 3],
+                                }],
+    },
+    _cmdline_examples => [
+        {
+            cmd         => '/home/steven/mydata /backup/steven/mydata',
+            explanation => '',
+        },
+    ],
+};
 sub backup {
     my %args = @_;
 
@@ -30,7 +56,7 @@ sub backup {
     }
     my $target    = $args{target} or die "Please specify target\n";
     $target       =~ s!/+$!!;
-    my $histories = $args{histories} or die "Please specify histories\n";
+    my $histories = $args{histories} // [-7, 4, 3];
     ref($histories) eq 'ARRAY' or die "histories must be array\n";
     my $backup    = $args{backup} // 1;
     my $rotate    = $args{rotate} // 1;
@@ -207,8 +233,12 @@ In daily-backup script:
  backup(
      source    => '/path/to/mydata',
      target    => '/backup/mydata',
-     histories => [7, 4, 3],         # 7 days, 4 weeks, 3 months
+     histories => [-7, 4, 3],         # 7 days, 4 weeks, 3 months
  );
+
+Or, just use the provided script:
+
+ % crbackup --source /path/to/mydata --target /backup/mydata
 
 =head1 DESCRIPTION
 
