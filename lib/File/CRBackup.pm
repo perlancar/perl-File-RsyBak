@@ -20,21 +20,61 @@ use String::ShellQuote;
 our %SUBS;
 
 $SUBS{backup} = {
-    _summary          =>
+    summary       =>
         'Backup files/directories with histories, using cp+rsync',
-    required_args     => [qw/source target/],
-    args              => {
-        source     => [either   => {of         => ['str*', 'str*[]*'],
-                                    _summary   => 'Director(y|ies) to backup',
-                                    _arg_order => 0,
-                                }],
-        target     => ['str*'   => {_summary   => 'Backup destination',
-                                    _arg_order => 1,
-                                }],
-        histories  => ['array*' => {of         => 'int*',
-                                    _summary   => 'Histories/history levels',
-                                    default    => [-7, 4, 3],
-                                }],
+    required_args => [qw/source target/],
+    args          => {
+        source           => [either   => {
+            of         => ['str*', 'str*[]*'],
+            _summary   => 'Director(y|ies) to backup',
+            _arg_order => 0,
+        }],
+        target           => ['str*'   => {
+            _summary   => 'Backup destination',
+            _arg_order => 1,
+        }],
+        histories        => ['array*' => {
+            of         => 'int*',
+            default    => [-7, 4, 3],
+            _summary   => 'Histories/history levels',
+        }],
+        extra_dir        => ['bool'   => {
+            _summary   => join(
+                '',
+                'If set to true, force creation of source directory ',
+                'inside target: TARGET/current/SRC. This is always turned on ',
+                'when there are multiple sources, but you can force it ',
+                'on for single source using this flag.'),
+        }],
+        backup           => [bool     => {
+            default    => 1,
+            _summary   => join(
+                '',
+                'Whether to do backup or not. If backup=1 and rotate=0 then ',
+                'will only create new backup without rotating histories.'),
+        }],
+        rotate           => [bool     => {
+            default    => 1,
+            _summary   => join(
+                '',
+                'Whether to rotate histories or not (which is done after ',
+                'backup). If backup=0 and rotate=1 then will only do history ',
+                'rotating.')
+        }],
+        extra_cp_opts    => [array    => {
+            of         => 'str*',
+            _summary   => join(
+                '',
+                'Extra options to pass to cp command when doing backup. ',
+                'Note that the options will be shell quoted.'),
+        }],
+        extra_rsync_opts => [array    => {
+            of         => 'str*',
+            _summary   => join(
+                '',
+                'Extra options to pass to rsync command when doing backup. ',
+                'Note that the options will be shell quoted.'),
+        }],
     },
     _cmdline_examples => [
         {
