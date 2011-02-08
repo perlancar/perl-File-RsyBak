@@ -491,6 +491,14 @@ performance of rsync/cp. Thus we designed a simple backup system based on them.
 
 First public release of this module is in Feb 2011.
 
+
+=head1 FAQ
+
+=head2 How do I exclude some directories?
+
+Just use rsync's --exclude et al. Pass them to extra_rsync_opts.
+
+
 =head1 TODO
 
 * Allow ionice etc instead of just nice -n19
