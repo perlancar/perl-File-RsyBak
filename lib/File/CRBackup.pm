@@ -5,9 +5,6 @@ use 5.010;
 use strict;
 use warnings;
 use Log::Any '$log';
-require Exporter;
-our @ISA       = qw(Exporter);
-our @EXPORT_OK = qw(backup);
 
 use File::chdir;
 use File::Flock;
@@ -17,6 +14,10 @@ use POSIX;
 use String::ShellQuote;
 #use Taint::Util;
 
+require Exporter;
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(backup);
+
 our %SUBS;
 
 $SUBS{backup} = {
@@ -25,61 +26,92 @@ $SUBS{backup} = {
     required_args => [qw/source target/],
     args          => {
         source           => [either   => {
-            of         => ['str*', 'str*[]*'],
-            _summary   => 'Director(y|ies) to backup',
-            _arg_order => 0,
+            of           => ['str*', ['array*' => {of=>'str*'}]],
+            summary      => 'Director(y|ies) to backup',
+            arg_order    => 0,
         }],
         target           => ['str*'   => {
-            _summary   => 'Backup destination',
-            _arg_order => 1,
+            summary      => 'Backup destination',
+            arg_order    => 1,
         }],
         histories        => ['array*' => {
-            of         => 'int*',
-            default    => [-7, 4, 3],
-            _summary   => 'Histories/history levels',
+            of           => 'int*',
+            default      => [-7, 4, 3],
+            summary      => 'Histories/history levels',
+            description  => <<'_',
+
+Specifies number of backup histories to keep for level 1, 2, and so on. If
+number is negative, specifies number of days to keep instead (regardless of
+number of histories).
+
+_
         }],
         extra_dir        => ['bool'   => {
-            _summary   => join(
-                '',
-                'If set to true, force creation of source directory ',
-                'inside target: TARGET/current/SRC. This is always turned on ',
-                'when there are multiple sources, but you can force it ',
-                'on for single source using this flag.'),
+            summary      =>
+                'Whether to force creation of source directory in target',
+            description  => <<'_',
+
+If set to 1, then backup(source => '/a', target => '/backup/a') will create
+another 'a' directory in target, i.e. /backup/a/current/a. Otherwise, contents
+of a/ will be directly copied under /backup/a/current/.
+
+Will always be set to 1 if source is more than one, but default to 0 if source
+is a single directory. You can set this to 1 to so that behaviour when there is
+a single source is the same as behaviour when there are several sources.
+
+_
         }],
         backup           => [bool     => {
-            default    => 1,
-            _summary   => join(
-                '',
-                'Whether to do backup or not. If backup=1 and rotate=0 then ',
-                'will only create new backup without rotating histories.'),
+            default      => 1,
+            summary      => 'Whether to do backup or not',
+            description  => <<'_',
+
+If backup=1 and rotate=0 then will only create new backup without rotating
+histories.
+
+_
         }],
         rotate           => [bool     => {
-            default    => 1,
-            _summary   => join(
-                '',
-                'Whether to rotate histories or not (which is done after ',
-                'backup). If backup=0 and rotate=1 then will only do history ',
-                'rotating.')
+            default      => 1,
+            summary      => 'Whether to do rotate after backup or not',
+            description  => <<'_',
+
+If backup=0 and rotate=1 then will only do history rotating.
+
+_
         }],
         extra_cp_opts    => [array    => {
-            of         => 'str*',
-            _summary   => join(
-                '',
-                'Extra options to pass to cp command when doing backup. ',
-                'Note that the options will be shell quoted.'),
+            of           => 'str*',
+            summary      => 'Pass extra options to cp command',
+            description  => <<'_',
+
+Extra options to pass to cp command when doing backup. Note that the options
+will be shell quoted.
+
+_
         }],
         extra_rsync_opts => [array    => {
-            of         => 'str*',
-            _summary   => join(
-                '',
-                'Extra options to pass to rsync command when doing backup. ',
-                'Note that the options will be shell quoted.'),
+            of           => 'str*',
+            summary      => 'Pass extra options to rsync command',
+            description  => <<'_',
+
+Extra options to pass to rsync command when doing backup. Note that the options
+will be shell quoted, , so you should pass it unquoted, e.g. ['--exclude',
+'/Program Files'].
+
+_
         }],
     },
-    _cmdline_examples => [
+
+    cmdline_examples => [
         {
             cmd         => '/home/steven/mydata /backup/steven/mydata',
-            explanation => '',
+            description => <<'_',
+
+Backup /home/steven/mydata to /backup/steven/mydata using the default number of
+histories ([-7, 4, 3]).
+
+_
         },
     ],
 };
@@ -426,55 +458,6 @@ TARGET/hist3.<timestamp85> comes along.
 =head1 FUNCTIONS
 
 None of the functions are exported by default.
-
-=head2 backup(%args)
-
-Arguments (those marked with C<*> are required):
-
-=over 4
-
-=item * source* => PATH or [PATH, ...]
-
-=item * target* => PATH
-
-=item * histories* => [NUM, ...]
-
-Specifies number of backup histories to keep for level 1, 2, and so on. If
-number is negative, specifies number of days to keep instead (regardless of
-number of histories).
-
-=item * extra_dir => BOOL
-
-If set to 1, then backup(source => '/a', target => '/backup/a') will create
-another 'a' directory, i.e. /backup/a/current/a. Otherwise, contents of a/ will
-be directly copied under /backup/a/current/.
-
-Will always be set to 1 if source is more than one, but default to 0 if source
-is a single directory. You can set this to 1 to so that behaviour when there is
-a single source is the same as behaviour when there are several sources.
-
-=item * backup => BOOL (default 1)
-
-Whether to do backup or not. If backup=1 and rotate=0 then will only create new
-backup without rotating histories.
-
-=item * rotate => BOOL (default 1)
-
-Whether to rotate histories or not (which is done after backup). If backup=0 and
-rotate=1 then will only do history rotating.
-
-=item * extra_cp_opts => ARRAYREF (default none)
-
-Extra options to pass to B<cp> command when doing backup. Note that the options
-will be shell quoted.
-
-=item * extra_rsync_opts => ARRAYREF (default none)
-
-Extra options to pass to B<rsync> command when doing backup. Note that the
-options will be shell quoted, so you should pass it unquoted, e.g. ['--exclude',
-'/Program Files'].
-
-=back
 
 
 =head1 HISTORY
