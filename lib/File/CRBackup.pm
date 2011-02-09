@@ -525,9 +525,9 @@ L<File::Backup>
 
 L<File::Rotate::Backup>
 
-L<Snapback2>, which is a backup system using the same principle as outlined
-above, created in as early as 2004 (or earlier) by Mike Heins. Do check it out.
-I wish I had found it first before reinventing it in 2006 :-)
+L<Snapback2>, which is a backup system using the same basic principle (cp -la +
+rsync snapshots), created in as early as 2004 (or earlier) by Mike Heins. Do
+check it out. I wish I had found it first before reinventing it in 2006 :-)
 
 =cut
 
