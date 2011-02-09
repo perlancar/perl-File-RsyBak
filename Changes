@@ -1,5 +1,10 @@
 Revision history for File-CRBackup
 
+0.04    2011-02-09
+
+        Some small fixes and update to newer version of Sub::Spec::CmdLine.
+
+
 0.03    2011-02-09
 
         Add script: crbackup.
