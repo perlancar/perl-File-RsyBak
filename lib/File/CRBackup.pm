@@ -163,6 +163,8 @@ sub backup {
     }
 
     unlock("$target/.lock");
+
+    [200, "OK"];
 }
 
 sub _backup {
