@@ -13,6 +13,7 @@ use File::Which qw(which);
 use POSIX;
 use String::ShellQuote;
 #use Taint::Util;
+use Time::Local;
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -25,7 +26,7 @@ $SUBS{backup} = {
         'Backup files/directories with histories, using cp+rsync',
     required_args => [qw/source target/],
     args          => {
-        source           => [either   => {
+        source           => ['any*'   => {
             of           => ['str*', ['array*' => {of=>'str*'}]],
             summary      => 'Director(y|ies) to backup',
             arg_order    => 0,
