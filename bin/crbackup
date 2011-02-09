@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Log::Any::App;
 
-use Sub::Hyper::CmdLine qw(run);
+use Sub::Spec::CmdLine qw(run);
 use File::CRBackup;
 
 run(module => 'File::CRBackup', sub => 'backup');
