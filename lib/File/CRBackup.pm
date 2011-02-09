@@ -29,11 +29,11 @@ $SUBS{backup} = {
         source           => ['any*'   => {
             of           => ['str*', ['array*' => {of=>'str*'}]],
             summary      => 'Director(y|ies) to backup',
-            arg_order    => 0,
+            arg_pos      => 0,
         }],
         target           => ['str*'   => {
             summary      => 'Backup destination',
-            arg_order    => 1,
+            arg_pos      => 1,
         }],
         histories        => ['array*' => {
             of           => 'int*',
