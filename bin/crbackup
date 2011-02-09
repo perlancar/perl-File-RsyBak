@@ -1,4 +1,8 @@
 #!/usr/bin/perl
+
+# workaround for dzil
+package crbackup;
+
 use 5.010;
 use strict;
 use warnings;
@@ -8,3 +12,19 @@ use Sub::Spec::CmdLine qw(run);
 use File::CRBackup;
 
 run(module => 'File::CRBackup', sub => 'backup');
+
+__END__
+
+=head1 NAME
+
+crbackup - Backup files/directories with histories, using cp+rsync
+
+=head1 DESCRIPTION
+
+See L<File::CRBackup> for more documentation.
+
+=head1 SEE ALSO
+
+L<File::CRBackup>
+
+=cut
