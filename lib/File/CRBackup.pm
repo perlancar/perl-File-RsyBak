@@ -498,6 +498,35 @@ First public release of this module is in Feb 2011.
 
 Just use rsync's --exclude et al. Pass them to extra_rsync_opts.
 
+=head2 What is a good backup practice (using CRBackup)?
+
+Just follow the general practice. While this is not a place to discuss backups
+in general, some of the principles are:
+
+=over 4
+
+=item * backup regularly (e.g. once daily or more often)
+
+=item * automate the process (else you'll forget)
+
+=item * backup to another disk partition and computer
+
+=item * verify your backups often (what good are they if they can't be restored)
+
+=item * when appropriate, encrypt your backups
+
+=back
+
+=head2 How do I restore backups?
+
+Backups are just verbatim copies of files/directories, so just use whatever
+filesystem tools you like.
+
+=head2 How to do remote backup?
+
+With CRBackup, rsync+ssh your resulting local backup to another host. I believe
+with L<Snapback2> you can directly SSH to remote hosts.
+
 
 =head1 TODO
 
