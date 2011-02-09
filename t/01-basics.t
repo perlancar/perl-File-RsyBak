@@ -10,8 +10,6 @@ use Test::More;
 $ENV{PATH} = "/usr/local/bin:/usr/bin:/bin";
 if (!which("cp") || !which("rsync")) {
     plan skip_all => "Can't find cp / rsync";
-} else {
-    plan tests => 9;
 }
 
 use File::chdir;
@@ -48,8 +46,8 @@ test_backup(
 
 # XXX test rsync_cp_opts
 
-# XXX don't delete if any tests of the above fails
-$CWD = "/";
+# don't delete if any tests of the above fails
+done_testing() and $CWD = "/";
 
 sub test_backup {
     my %args = @_;
