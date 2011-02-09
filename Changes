@@ -1,5 +1,14 @@
 Revision history for File-CRBackup
 
+0.03    2011-02-09
+
+        Add script: crbackup.
+
+        Add more documentation.
+
+        Fix missing dependencies/use statements.
+
+
 0.02    2011-02-05
 
         Add arguments: extra_cp_opts, extra_rsync_opts
