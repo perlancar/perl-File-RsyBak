@@ -21,7 +21,6 @@ use String::ShellQuote;
 
 my $tmpdir = tempdir(CLEANUP => 1);
 $CWD = $tmpdir;
-diag("tmpdir = $tmpdir");
 
 test_backup(
     n_sources => 1,
@@ -47,7 +46,11 @@ test_backup(
 # XXX test rsync_cp_opts
 
 # don't delete if any tests of the above fails
-done_testing() and $CWD = "/";
+if (done_testing()) {
+    $CWD = "/";
+} else {
+    diag("tmpdir = $tmpdir");
+}
 
 sub test_backup {
     my %args = @_;
