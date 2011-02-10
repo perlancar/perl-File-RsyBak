@@ -1,5 +1,11 @@
 Revision history for File-CRBackup
 
+0.06    2011-02-10
+
+        Add POD documentation for functions (using
+        Pod::Weaver::Plugin::SubSpec).
+
+
 0.05    2011-02-09
 
         Add missing dependencies for script 'crbackup'.
