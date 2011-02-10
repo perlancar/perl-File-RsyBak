@@ -460,7 +460,7 @@ TARGET/hist3.<timestamp85> comes along.
 
 =head1 FUNCTIONS
 
-None of the functions are exported by default.
+None of the functions are exported by default, but they are exportable.
 
 
 =head1 HISTORY
