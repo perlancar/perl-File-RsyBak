@@ -2,6 +2,7 @@
 
 # workaround for dzil
 package crbackup;
+# ABSTRACT: Backup files/directories with histories, using cp+rsync
 
 use 5.010;
 use strict;
@@ -14,10 +15,6 @@ use File::CRBackup;
 run(module => 'File::CRBackup', sub => 'backup');
 
 __END__
-
-=head1 NAME
-
-crbackup - Backup files/directories with histories, using cp+rsync
 
 =head1 DESCRIPTION
 
