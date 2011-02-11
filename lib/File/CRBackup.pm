@@ -24,7 +24,6 @@ our %SUBS;
 $SUBS{backup} = {
     summary       =>
         'Backup files/directories with histories, using cp+rsync',
-    required_args => [qw/source target/],
     args          => {
         source           => ['any*'   => {
             of           => ['str*', ['array*' => {of=>'str*'}]],
