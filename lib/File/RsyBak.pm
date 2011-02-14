@@ -1,5 +1,5 @@
-package File::CRBackup;
-# ABSTRACT: Backup files/directories with histories, using cp+rsync
+package File::RsyBak;
+# ABSTRACT: Backup files/directories with histories, using rsync
 
 use 5.010;
 use strict;
@@ -23,7 +23,7 @@ our %SUBS;
 
 $SUBS{backup} = {
     summary       =>
-        'Backup files/directories with histories, using cp+rsync',
+        'Backup files/directories with histories, using rsync',
     args          => {
         source           => ['any*'   => {
             of           => ['str*', ['array*' => {of=>'str*'}]],
@@ -80,16 +80,6 @@ If backup=0 and rotate=1 then will only do history rotating.
 
 _
         }],
-        extra_cp_opts    => [array    => {
-            of           => 'str*',
-            summary      => 'Pass extra options to cp command',
-            description  => <<'_',
-
-Extra options to pass to cp command when doing backup. Note that the options
-will be shell quoted.
-
-_
-        }],
         extra_rsync_opts => [array    => {
             of           => 'str*',
             summary      => 'Pass extra options to rsync command',
@@ -135,7 +125,6 @@ sub backup {
     my $extra_dir = $args{extra_dir} || (@sources > 1);
 
     # sanity
-    my $cp_path    = which("cp")    or die "Can't find cp in PATH\n";
     my $rsync_path = which("rsync") or die "Can't find rsync in PATH\n";
 
     unless (-d $target) {
@@ -152,7 +141,6 @@ sub backup {
             \@sources, $target,
             {
                 extra_dir        => $extra_dir,
-                extra_cp_opts    => $args{extra_cp_opts},
                 extra_rsync_opts => $args{extra_rsync_opts},
             });
     }
@@ -299,26 +287,23 @@ __END__
 
 =head1 SYNOPSIS
 
-In daily-backup script:
+From your Perl program:
 
- #!/usr/bin/perl
- use File::CRBackup qw(backup);
- use Log::Any::App;
+ use File::RsyBak qw(backup);
  backup(
      source    => '/path/to/mydata',
      target    => '/backup/mydata',
      histories => [-7, 4, 3],         # 7 days, 4 weeks, 3 months
  );
 
-Or, just use the provided script:
+Or, just use the provided script from the command-line:
 
- % crbackup --source /path/to/mydata --target /backup/mydata
+ % rsybak --source /path/to/mydata --target /backup/mydata
 
 =head1 DESCRIPTION
 
-This module utilizes two mature, dependable Unix command-line utilities, B<cp>
-and B<rsync>, to create a filesystem backup system. Some characteristics of this
-backup system:
+This module is basically just a wrapper around B<rsync> to create a filesystem
+backup system. Some characteristics of this backup system:
 
 =over 4
 
@@ -331,13 +316,13 @@ The number of levels and history per levels are customizable.
 
 =item * Backups (and histories) are not compressed/archived ("tar"-ed)
 
-They are just verbatim copies (produced by L<cp -a>, or L<rsync -a>) of source
-directory. The upside of this is ease of cherry-picking (taking/restoring
-individual files from backup). The downside is lack of compression and the
-backup not being a single archive file.
+They are just verbatim copies (produced by L<rsync -a>) of source directory. The
+upside of this is ease of cherry-picking (taking/restoring individual files from
+backup). The downside is lack of compression and the backup not being a single
+archive file.
 
-This is because rsync needs two real directory trees when comparing. Perhaps
-when rsync supports tar virtual filesystem in the future...
+This is because rsync needs two real directory trees when comparing. Perhaps if
+rsync supports tar virtual filesystem in the future...
 
 =item * Hardlinks are used between backup histories to save disk space
 
@@ -346,13 +331,13 @@ space duplicating data when there are not a lot of differences among them.
 
 =item * High performance
 
-Rsync and cp are implemented in C and have been optimized for a long time. B<rm>
-is also used instead of Perl implementation File::Path::remove_path.
+Rsync is implemented in C and has been optimized for a long time. B<rm> is also
+used instead of Perl implementation File::Path::remove_path.
 
 =item * Unix-specific
 
-There are ports of cp, rm, and rsync on Windows, but this module hasn't been
-tested on those platforms.
+There are ports of rsync and rm on Windows, but this module hasn't been tested
+on those platforms.
 
 =back
 
@@ -371,7 +356,7 @@ interfering:
 
 Then we copy source to temporary directory:
 
- cp -a    SRC            TARGET/.tmp
+ rsync .. SRC            TARGET/.tmp
 
 If copy finishes successfully, we rename temporary directory to final directory
 'current':
@@ -380,9 +365,9 @@ If copy finishes successfully, we rename temporary directory to final directory
  touch    TARGET/.current.timestamp
 
 If copy fails in the middle, TARGET/.tmp will still be lying around and the next
-backup process will try to rsync it (to be more efficient):
+backup run will just continue the rsync process:
 
- rsync    SRC            TARGET/.tmp
+ rsync .. SRC            TARGET/.tmp
 
 Finally, we remove lock:
 
@@ -394,13 +379,9 @@ First, we lock target directory to prevent other backup process to interfere:
 
  flock    TARGET/.lock
 
-Then we copy current to temporary directory, using hardlinks when possible:
+Then we rsync source to target directory (using --link-dest=TARGET/current):
 
- cp -la   TARGET/current TARGET/.tmp
-
-Then we rsync source to target directory:
-
- rsync    SRC            TARGET/.tmp
+ rsync .. SRC            TARGET/.tmp
 
 If rsync finishes successfully, we rename target directories:
 
@@ -409,7 +390,7 @@ If rsync finishes successfully, we rename target directories:
  touch    TARGET/.current.timestamp
 
 If rsync fails in the middle, TARGET/.tmp will be lying around and the next
-backup process will just continue the rsync process.
+backup run will just continue the rsync process.
 
 Finally, we remove lock:
 
@@ -472,7 +453,7 @@ exit on many kinds of non-fatal errors instead of ignoring the errors and
 continuning backup. It was also very slow: on a server with hundreds of accounts
 with millions of files, backup process often took 12 hours or more. After
 evaluating several other solutions, we realized that nothing beats the raw
-performance of rsync/cp. Thus we designed a simple backup system based on them.
+performance of rsync. Thus we designed a simple backup system based on them.
 
 First public release of this module is in Feb 2011.
 
@@ -483,7 +464,7 @@ First public release of this module is in Feb 2011.
 
 Just use rsync's --exclude et al. Pass them to extra_rsync_opts.
 
-=head2 What is a good backup practice (using CRBackup)?
+=head2 What is a good backup practice (using RsyBak)?
 
 Just follow the general practice. While this is not a place to discuss backups
 in general, some of the principles are:
@@ -509,8 +490,13 @@ filesystem tools you like.
 
 =head2 How to do remote backup?
 
-With CRBackup, rsync+ssh your resulting local backup to another host. I believe
-with L<Snapback2> you can directly SSH to remote hosts.
+Using rsync+ssh. From your backup host:
+
+ [BAK-HOST]% rsybak --source USER@SRC-HOST:/path --dest /backup/dir
+
+Alternatively you can alternatively perform the backup on the source server:
+
+ [SRC-HOST]% rsybak --source /path --dest USER@BAK-HOST:/backup/dir
 
 
 =head1 TODO
@@ -524,9 +510,9 @@ L<File::Backup>
 
 L<File::Rotate::Backup>
 
-L<Snapback2>, which is a backup system using the same basic principle (cp -la +
-rsync snapshots), created in as early as 2004 (or earlier) by Mike Heins. Do
-check it out. I wish I had found it first before reinventing it in 2006 :-)
+L<Snapback2>, which is a backup system using the same basic principle (rsync
+snapshots), created in as early as 2004 (or earlier) by Mike Heins. Do check it
+out. I wish I had found it first before reinventing it in 2006 :-)
 
 =cut
 

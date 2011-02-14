@@ -1,5 +1,11 @@
 Revision history for File-CRBackup
 
+0.08    2011-02-14
+
+        Rename from File-CRBackup -> File-RsyBak. Remove the use of "cp -la" and
+        use "rsync --link-dest" instead. Allow remote source or target.
+
+
 0.07    2011-02-11
 
         Fix POD.
