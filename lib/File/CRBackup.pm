@@ -498,7 +498,7 @@ in general, some of the principles are:
 
 =item * verify your backups often (what good are they if they can't be restored)
 
-=item * when appropriate, encrypt your backups
+=item * make sure your backup is secure (encrypted, correct permission, etc)
 
 =back
 
