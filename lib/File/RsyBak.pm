@@ -409,7 +409,7 @@ interfering:
 
 Then we copy source to temporary directory:
 
- rsync .. SRC            TARGET/.tmp
+ rsync    SRC            TARGET/.tmp
 
 If copy finishes successfully, we rename temporary directory to final directory
 'current':
@@ -420,7 +420,7 @@ If copy finishes successfully, we rename temporary directory to final directory
 If copy fails in the middle, TARGET/.tmp will still be lying around and the next
 backup run will just continue the rsync process:
 
- rsync .. SRC            TARGET/.tmp
+ rsync    SRC            TARGET/.tmp
 
 Finally, we remove lock:
 
@@ -434,7 +434,7 @@ First, we lock target directory to prevent other backup process to interfere:
 
 Then we rsync source to target directory (using --link-dest=TARGET/current):
 
- rsync .. SRC            TARGET/.tmp
+ rsync    SRC            TARGET/.tmp
 
 If rsync finishes successfully, we rename target directories:
 
