@@ -1,5 +1,10 @@
 Revision history for File-CRBackup
 
+0.09    2011-02-15
+
+        Fix sub spec (--histories is optional).
+
+
 0.08    2011-02-15
 
         Rename from File-CRBackup -> File-RsyBak.
