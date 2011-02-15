@@ -159,34 +159,34 @@ sub backup {
     my %args = @_;
 
     # XXX schema
-    my $source    = $args{source} or die "Error: Please specify source\n";
+    my $source    = $args{source} or return [400, "Please specify source"];
     my @sources   = ref($source) eq 'ARRAY' ? @$source : ($source);
     for (@sources) { $_ = _parse_path($_) }
     _check_sources(\@sources);
-    my $target    = $args{target} or die "Error: Please specify target\n";
+    my $target    = $args{target} or return [400, "Please specify target"];
     $target       = _parse_path($target);
     $target->{remote} and
-        die "Error: Sorry, target can't be remote at the moment\n";
+        return [400, "Sorry, target can't be remote at the moment"];
     my $histories = $args{histories} // [-7, 4, 3];
-    ref($histories) eq 'ARRAY' or die "Error: histories must be array\n";
+    ref($histories) eq 'ARRAY' or return [400, "histories must be array"];
     my $backup    = $args{backup} // 1;
     my $rotate    = $args{rotate} // 1;
     my $extra_dir = $args{extra_dir} || (@sources > 1);
 
     # sanity
     my $rsync_path = which("rsync")
-        or die "Error: Can't find rsync in PATH\n";
+        or return [500, "Can't find rsync in PATH"];
 
     unless (-d $target->{abs_path}) {
         $log->debugf("Creating target directory %s ...", $target->{abs_path});
         make_path($target->{abs_path})
-            or die "Error: Can't create target directory ".
-                "$target->{abs_path}: $!\n";
+            or return [500, "Error: Can't create target directory ".
+                "$target->{abs_path}: $!"];
     }
 
-    die "Error: Can't lock $target->{abs_path}/.lock, ".
-        "perhaps another backup process is running\n"
-            unless lock("$target->{abs_path}/.lock", undef, "nonblocking");
+    return [409, "Error: Can't lock $target->{abs_path}/.lock, ".
+                "perhaps another backup process is running"]
+        unless lock("$target->{abs_path}/.lock", undef, "nonblocking");
 
     if ($backup) {
         _backup(
