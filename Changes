@@ -1,9 +1,12 @@
 Revision history for File-CRBackup
 
-0.08    2011-02-14
+0.08    2011-02-15
 
-        Rename from File-CRBackup -> File-RsyBak. Remove the use of "cp -la" and
-        use "rsync --link-dest" instead. Allow remote source or target.
+        Rename from File-CRBackup -> File-RsyBak.
+
+        Remove the use of "cp -la" and use "rsync --link-dest" instead.
+
+        Allow remote sources.
 
 
 0.07    2011-02-11
