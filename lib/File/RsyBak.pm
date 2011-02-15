@@ -58,17 +58,18 @@ sub _check_sources {
         if (!$_->{remote}) { $all_remote = 0; last }
     }
 
-    die "Error: Sources must be all local or all remote\n"
+    return [400, "Sources must be all local or all remote"]
         unless $all_remote || $all_local;
 
     if ($all_remote) {
         my $host;
         for (@$sources) {
             $host //= $_->{host};
-            die "Error: Remote sources must all be from the same machine\n"
+            return [400, "Remote sources must all be from the same machine"]
                 if $host ne $_->{host};
         }
     }
+    [200, "OK"];
 }
 
 $SUBS{backup} = {
@@ -162,7 +163,8 @@ sub backup {
     my $source    = $args{source} or return [400, "Please specify source"];
     my @sources   = ref($source) eq 'ARRAY' ? @$source : ($source);
     for (@sources) { $_ = _parse_path($_) }
-    _check_sources(\@sources);
+    my $res = _check_sources(\@sources);
+    return $res unless $res->[0] == 200;
     my $target    = $args{target} or return [400, "Please specify target"];
     $target       = _parse_path($target);
     $target->{remote} and
