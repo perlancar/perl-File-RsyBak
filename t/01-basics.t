@@ -8,8 +8,8 @@ use warnings;
 use Test::More;
 
 $ENV{PATH} = "/usr/local/bin:/usr/bin:/bin";
-if (!which("cp") || !which("rsync")) {
-    plan skip_all => "Can't find cp / rsync";
+if (!which("rsync")) {
+    plan skip_all => "Can't find rsync";
 }
 
 use File::chdir;
