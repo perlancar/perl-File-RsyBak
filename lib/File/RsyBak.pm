@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-use Cwd;
+use Cwd ();
 use File::chdir;
 use File::Flock;
 use File::Path  qw(make_path);
