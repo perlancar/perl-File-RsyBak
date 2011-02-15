@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
+use Cwd;
 use File::chdir;
 use File::Flock;
 use File::Path  qw(make_path);
@@ -20,6 +21,55 @@ our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(backup);
 
 our %SUBS;
+
+sub _parse_path {
+    my ($path) = @_;
+    $path =~ s!/+$!!;
+    if ($path =~ m!^(\S+)::([^/]+)/?(.*)$!) {
+        return {
+            raw=>$path, remote=>1, host=>$1,
+            proto=>"rsync", module=>$2, path=>$3,
+        };
+    } elsif ($path =~ m!([^@]+)?\@?(^\S+):(.*)$!) {
+        return {
+            raw=>$path, remote=>1, host=>$2,
+            user=>$1, proto=>"ssh", path=>$3,
+        };
+    } else {
+        return {
+            raw=>$path, remote=>0, path=>$path,
+            abs_path=>Cwd::abs_path($path)
+        };
+    }
+}
+
+# rsync requires all source to be local, or remote (same host). check sources
+# before we run rsync, so we can report the error and die earlier.
+sub _check_sources {
+    my ($sources) = @_;
+
+    my $all_local = 1;
+    for (@$sources) {
+        if ($_->{remote}) { $all_local = 0; last }
+    }
+
+    my $all_remote = 1;
+    for (@$sources) {
+        if (!$_->{remote}) { $all_remote = 0; last }
+    }
+
+    die "Error: Sources must be all local or all remote\n"
+        unless $all_remote || $all_local;
+
+    if ($all_remote) {
+        my $host;
+        for (@$sources) {
+            $host //= $_->{host};
+            die "Error: Remote sources must all be from the same machine\n"
+                if $host ne $_->{host};
+        }
+    }
+}
 
 $SUBS{backup} = {
     summary       =>
@@ -109,32 +159,34 @@ sub backup {
     my %args = @_;
 
     # XXX schema
-    my $source    = $args{source} or die "Please specify source\n";
+    my $source    = $args{source} or die "Error: Please specify source\n";
     my @sources   = ref($source) eq 'ARRAY' ? @$source : ($source);
-    for (@sources) {
-        s!/+$!!;
-        lstat $_;
-        (-e _) or die "Source path `$_` doesn't exist\n";
-    }
-    my $target    = $args{target} or die "Please specify target\n";
-    $target       =~ s!/+$!!;
+    for (@sources) { $_ = _parse_path($_) }
+    _check_sources(\@sources);
+    my $target    = $args{target} or die "Error: Please specify target\n";
+    $target       = _parse_path($target);
+    $target->{remote} and
+        die "Error: Sorry, target can't be remote at the moment\n";
     my $histories = $args{histories} // [-7, 4, 3];
-    ref($histories) eq 'ARRAY' or die "histories must be array\n";
+    ref($histories) eq 'ARRAY' or die "Error: histories must be array\n";
     my $backup    = $args{backup} // 1;
     my $rotate    = $args{rotate} // 1;
     my $extra_dir = $args{extra_dir} || (@sources > 1);
 
     # sanity
-    my $rsync_path = which("rsync") or die "Can't find rsync in PATH\n";
+    my $rsync_path = which("rsync")
+        or die "Error: Can't find rsync in PATH\n";
 
-    unless (-d $target) {
-        $log->debugf("Creating target directory %s ...", $target);
-        make_path($target)
-            or die "Can't create target directory $target: $!\n";
+    unless (-d $target->{abs_path}) {
+        $log->debugf("Creating target directory %s ...", $target->{abs_path});
+        make_path($target->{abs_path})
+            or die "Error: Can't create target directory ".
+                "$target->{abs_path}: $!\n";
     }
 
-    die "Can't lock $target, perhaps another backup process is running\n"
-        unless lock("$target/.lock", undef, "nonblocking");
+    die "Error: Can't lock $target->{abs_path}/.lock, ".
+        "perhaps another backup process is running\n"
+            unless lock("$target->{abs_path}/.lock", undef, "nonblocking");
 
     if ($backup) {
         _backup(
@@ -146,62 +198,61 @@ sub backup {
     }
 
     if ($rotate) {
-        _rotate($target, $histories);
+        _rotate($target->{abs_path}, $histories);
     }
 
-    unlock("$target/.lock");
+    unlock("$target->{abs_path}/.lock");
 
     [200, "OK"];
 }
 
 sub _backup {
     my ($sources, $target, $opts) = @_;
-    $log->infof("Starting backup %s ==> %s ...", $sources, $target);
+    $log->infof("Starting backup %s ==> %s ...",
+                [map {$_->{raw}} @$sources], $target);
     my $cmd;
-    if (-e "$target/current" && !(-e "$target/.tmp")) {
-        $cmd = join(
-            "",
-            "nice -n19 cp -al ",
-            ($opts->{extra_cp_opts} ? map { shell_quote($_), " " }
-                 @{$opts->{extra_cp_opts}} : ()),
-            shell_quote("$target/current"),
-            " ", shell_quote("$target/.tmp")
-        );
-        $log->debug("system(): $cmd");
-        system $cmd;
-	$log->warn("cp TARGET/current ==> TARGET/.tmp didn't succeed ($?)".
-                       ", please check") if $?;
-    }
     $cmd = join(
         "",
-        "nice -n19 rsync -a --del --force ",
+        "nice -n19 rsync ",
         ($opts->{extra_rsync_opts} ? map { shell_quote($_), " " }
              @{$opts->{extra_rsync_opts}} : ()),
-        map({ shell_quote($_),
-              ($opts->{extra_dir} || !(-d $_) ? "" : "/"), " " }
+        "-a --del --force --ignore-errors --ignore-existing ",
+        ((-e "$target->{abs_path}/current") ?
+             "--link-dest ".shell_quote("$target->{abs_path}/current")." "
+                 : ""),
+        map({ shell_quote($_->{raw}), ($opts->{extra_dir} ? "" : "/"), " " }
                 @$sources),
-        shell_quote("$target/.tmp/"),
+        shell_quote("$target->{abs_path}/.tmp/"),
     );
-    $log->debug("system(): $cmd");
+    $log->debug("Running rsync ...");
+    $log->trace("system(): $cmd");
     system $cmd;
-    $log->warn("rsync SOURCE ==> TARGET/.tmp didn't succeed ($?)".
+    $log->warn("rsync didn't succeed ($?)".
                    ", please recheck") if $?;
 
     # but continue anyway, half backups are better than nothing
 
-    if (-e "$target/current") {
-        $log->debug("touch $target/.current.timestamp ...");
-        system "touch $target/.current.timestamp";
+    if (-e "$target->{abs_path}/current") {
+        $log->debug("touch $target->{abs_path}/.current.timestamp ...");
+        system "touch $target->{abs_path}/.current.timestamp";
         my @st     = stat(".current.timestamp");
         my $tstamp = POSIX::strftime(
             "%Y-%m-%d\@%H:%M:%S+00",
             gmtime( $st[9] || time() ));
-        $log->debug("rename $target/current ==> $target/hist.$tstamp ...");
-        rename "$target/current", "$target/hist.$tstamp";
+        $log->debug("rename $target->{abs_path}/current ==> ".
+                        "hist.$tstamp ...");
+        unless (rename "$target->{abs_path}/current",
+                "$target->{abs_path}/hist.$tstamp") {
+            $log->warn("Failed renaming $target->{abs_path}/current ==> ".
+                         "hist.$tstamp: $!");
+        }
     }
 
-    $log->debug("rename $target/.tmp ==> current ...");
-    rename "$target/.tmp", "$target/current";
+    $log->debug("rename $target->{abs_path}/.tmp ==> current ...");
+    unless (rename "$target->{abs_path}/.tmp",
+            "$target->{abs_path}/current") {
+        $log->warn("Failed renaming $target->{abs_path}/.tmp ==> current: $!");
+    }
 
     $log->infof("Finished backup %s ==> %s", $sources, $target);
 }
@@ -490,13 +541,12 @@ filesystem tools you like.
 
 =head2 How to do remote backup?
 
-Using rsync+ssh. From your backup host:
+From your backup host:
 
  [BAK-HOST]% rsybak --source USER@SRC-HOST:/path --dest /backup/dir
 
-Alternatively you can alternatively perform the backup on the source server:
-
- [SRC-HOST]% rsybak --source /path --dest USER@BAK-HOST:/backup/dir
+Or alternatively, you can backup on SRC-HOST locally first, then send the
+resulting backup to BAK-HOST.
 
 
 =head1 TODO
