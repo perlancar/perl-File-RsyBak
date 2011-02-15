@@ -15,7 +15,7 @@ if (!which("rsync")) {
 use File::chdir;
 use File::Temp     qw(tempdir);
 use File::Which    qw(which);
-use File::CRBackup qw(backup);
+use File::RsyBak   qw(backup);
 use File::Slurp;
 use String::ShellQuote;
 
