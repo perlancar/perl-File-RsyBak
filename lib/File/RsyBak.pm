@@ -84,7 +84,7 @@ $SUBS{backup} = {
             summary      => 'Backup destination',
             arg_pos      => 1,
         }],
-        histories        => ['array*' => {
+        histories        => ['array' => {
             of           => 'int*',
             default      => [-7, 4, 3],
             summary      => 'Histories/history levels',
