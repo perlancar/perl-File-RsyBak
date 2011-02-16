@@ -7,11 +7,14 @@ package rsybak;
 use 5.010;
 use strict;
 use warnings;
-use Log::Any::App;
+BEGIN {
+    # reduce startup overhead if being invoked for bash completion
+    unless (defined($ENV{COMP_LINE})) {
+        require Log::Any::App;
+    }
+}
 
 use Sub::Spec::CmdLine qw(run);
-use File::RsyBak;
-
 run(module => 'File::RsyBak', sub => 'backup');
 
 __END__
