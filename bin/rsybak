@@ -11,6 +11,8 @@ BEGIN {
     # reduce startup overhead if being invoked for bash completion
     unless ($ENV{COMP_LINE}) {
         require Log::Any::App;
+        # older Log::Any::App (< 0.26) which croaks when import() is not called
+        Log::Any::App->import();
     }
 }
 
