@@ -9,7 +9,7 @@ use strict;
 use warnings;
 BEGIN {
     # reduce startup overhead if being invoked for bash completion
-    unless (defined($ENV{COMP_LINE})) {
+    unless ($ENV{COMP_LINE}) {
         require Log::Any::App;
     }
 }
