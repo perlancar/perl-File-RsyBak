@@ -20,7 +20,7 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(backup);
 
-our %SUBS;
+our %SPEC;
 
 sub _parse_path {
     my ($path) = @_;
@@ -72,7 +72,7 @@ sub _check_sources {
     [200, "OK"];
 }
 
-$SUBS{backup} = {
+$SPEC{backup} = {
     summary       =>
         'Backup files/directories with histories, using rsync',
     args          => {
