@@ -5,6 +5,7 @@ use 5.010;
 use strict;
 use warnings;
 
+use File::chdir;
 use Test::More;
 
 $ENV{PATH} = "/usr/local/bin:/usr/bin:/bin";
@@ -12,7 +13,6 @@ if (!which("rsync")) {
     plan skip_all => "Can't find rsync";
 }
 
-use File::chdir;
 use File::Temp     qw(tempdir);
 use File::Which    qw(which);
 use File::RsyBak   qw(backup);
