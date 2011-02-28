@@ -1,5 +1,12 @@
 Revision history for File-RsyBak
 
+0.14    2011-02-28
+
+        Spec: add 'deps' clause to nice/rsync/rm execs.
+
+        Require newer version of Sub::Spec::CmdLine.
+
+
 0.13    2011-02-22
 
         Update to latest Sub::Spec (%SUBS -> %SPEC).
