@@ -45,8 +45,8 @@ test_backup(
 
 # XXX test rsync_cp_opts
 
-# don't delete if any tests of the above fails
-if (done_testing()) {
+done_testing();
+if (Test::More->builder->is_passing) {
     $CWD = "/";
 } else {
     diag("tmpdir = $tmpdir");
