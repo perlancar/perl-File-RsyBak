@@ -514,7 +514,7 @@ exit on many kinds of non-fatal errors instead of ignoring the errors and
 continuning backup. It was also very slow: on a server with hundreds of accounts
 with millions of files, backup process often took 12 hours or more. After
 evaluating several other solutions, we realized that nothing beats the raw
-performance of rsync. Thus we designed a simple backup system based on them.
+performance of rsync. Thus we designed a simple backup system based on it.
 
 First public release of this module is in Feb 2011.
 
