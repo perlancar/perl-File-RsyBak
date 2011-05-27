@@ -243,12 +243,11 @@ sub _backup {
     # but continue anyway, half backups are better than nothing
 
     if (-e "$target->{abs_path}/current") {
-        $log->debug("touch $target->{abs_path}/.current.timestamp ...");
-        system "touch $target->{abs_path}/.current.timestamp";
-        my @st     = stat(".current.timestamp");
+        my $tspath = "$target->{abs_path}/.current.timestamp";
+        my @st     = stat($tspath);
         my $tstamp = POSIX::strftime(
             "%Y-%m-%d\@%H:%M:%S+00",
-            gmtime( $st[9] || time() ));
+            gmtime( $st[9] || time() )); # timestamp might not exist yet
         $log->debug("rename $target->{abs_path}/current ==> ".
                         "hist.$tstamp ...");
         unless (rename "$target->{abs_path}/current",
@@ -256,6 +255,8 @@ sub _backup {
             $log->warn("Failed renaming $target->{abs_path}/current ==> ".
                          "hist.$tstamp: $!");
         }
+        $log->debug("touch $tspath ...");
+        system "touch ".shell_quote($tspath);
     }
 
     $log->debug("rename $target->{abs_path}/.tmp ==> current ...");
