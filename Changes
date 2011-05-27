@@ -1,5 +1,13 @@
 Revision history for File-RsyBak
 
+0.15    2011-05-27
+
+        [BUG FIXES]
+
+        - The code touched .current.timestamp before we use its mtime for
+          history backup dir name, it should be after.
+
+
 0.14    2011-02-28
 
         Spec: add 'deps' clause to nice/rsync/rm execs.
