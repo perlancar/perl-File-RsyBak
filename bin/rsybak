@@ -2,24 +2,18 @@
 
 # workaround for dzil
 package rsybak;
-# ABSTRACT: Backup files/directories with histories, using rsync
 
 use 5.010;
 use strict;
 use warnings;
-BEGIN {
-    # reduce startup overhead if being invoked for bash completion
-    unless ($ENV{COMP_LINE}) {
-        require Log::Any::App;
-        # older Log::Any::App (< 0.26) which croaks when import() is not called
-        Log::Any::App->import();
-    }
-}
+use Perinci::CmdLine;
 
-use Sub::Spec::CmdLine qw(run);
-run(module => 'File::RsyBak', sub => 'backup');
+# VERSION
 
-__END__
+Perinci::CmdLine->(url => '/File/RsyBack/backup')->run;
+
+1;
+# ABSTRACT: Backup files/directories with histories, using rsync
 
 =head1 DESCRIPTION
 
