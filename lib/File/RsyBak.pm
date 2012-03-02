@@ -145,9 +145,9 @@ _
         }],
     },
 
-    cmdline_examples => [
+    examples => [
         {
-            cmd         => '/home/steven/mydata /backup/steven/mydata',
+            argv         => ['/home/steven/mydata','/backup/steven/mydata'],
             description => <<'_',
 
 Backup /home/steven/mydata to /backup/steven/mydata using the default number of
