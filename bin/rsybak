@@ -10,7 +10,7 @@ use Perinci::CmdLine;
 
 # VERSION
 
-Perinci::CmdLine->(url => '/File/RsyBack/backup')->run;
+Perinci::CmdLine->new(url => '/File/RsyBak/backup')->run;
 
 1;
 # ABSTRACT: Backup files/directories with histories, using rsync
