@@ -5,15 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-use Cwd ();
 use File::chdir;
-use File::Flock;
-use File::Path  qw(make_path);
-use File::Which qw(which);
-use POSIX;
-use String::ShellQuote;
-#use Taint::Util;
-use Time::Local;
 
 require Exporter;
 our @ISA       = qw(Exporter);
@@ -24,6 +16,8 @@ our @EXPORT_OK = qw(backup);
 our %SPEC;
 
 sub _parse_path {
+    require Cwd;
+
     my ($path) = @_;
     $path =~ s!/+$!!;
     if ($path =~ m!^(\S+)::([^/]+)/?(.*)$!) {
@@ -166,6 +160,10 @@ _
     },
 };
 sub backup {
+    require File::Flock;
+    require File::Path;
+    require File::Which;
+
     my %args = @_;
 
     # XXX schema
@@ -185,19 +183,20 @@ sub backup {
     my $extra_dir = $args{extra_dir} || (@sources > 1);
 
     # sanity
-    my $rsync_path = which("rsync")
+    my $rsync_path = File::Which::which("rsync")
         or return [500, "Can't find rsync in PATH"];
 
     unless (-d $target->{abs_path}) {
         $log->debugf("Creating target directory %s ...", $target->{abs_path});
-        make_path($target->{abs_path})
+        File::Path::make_path($target->{abs_path})
             or return [500, "Error: Can't create target directory ".
                 "$target->{abs_path}: $!"];
     }
 
     return [409, "Error: Can't lock $target->{abs_path}/.lock, ".
                 "perhaps another backup process is running"]
-        unless lock("$target->{abs_path}/.lock", undef, "nonblocking");
+        unless File::Flock::lock("$target->{abs_path}/.lock", undef,
+                                 "nonblocking");
 
     if ($backup) {
         _backup(
@@ -212,12 +211,15 @@ sub backup {
         _rotate($target->{abs_path}, $histories);
     }
 
-    unlock("$target->{abs_path}/.lock");
+    File::Flock::unlock("$target->{abs_path}/.lock");
 
     [200, "OK"];
 }
 
 sub _backup {
+    require POSIX;
+    require String::ShellQuote; String::ShellQuote->import;
+
     my ($sources, $target, $opts) = @_;
     $log->infof("Starting backup %s ==> %s ...",
                 [map {$_->{raw}} @$sources], $target);
@@ -271,6 +273,9 @@ sub _backup {
 
 
 sub _rotate {
+    require String::ShellQuote; String::ShellQuote->import;
+    require Time::Local;
+
     my ($target, $histories) = @_;
     $log->infof("Rotating backup histories in %s (%s) ...",
                 $target, $histories);
@@ -316,7 +321,7 @@ sub _rotate {
                 my $f2 = "$prefix_next_level.$st";
                 my $t;
                 $st =~ /(\d\d\d\d)-(\d\d)-(\d\d)\@(\d\d):(\d\d):(\d\d)\+00/;
-                $t = timegm($6, $5, $4, $3, $2 - 1, $1) if $1;
+                $t = Time::Local::timegm($6, $5, $4, $3, $2 - 1, $1) if $1;
                 unless ($st && $t) {
                     $log->warn("Wrong format of history, ignored: $f");
                     next;
