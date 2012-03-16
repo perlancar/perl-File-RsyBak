@@ -1,5 +1,11 @@
 Revision history for File-RsyBak
 
+0.18    2012-03-16
+
+        No functional changes. Rebuild with Pod::Weaver::Plugin::Perinci
+        enabled.
+
+
 0.17    2012-03-03
 
         No functional changes. Reduce startup overhead by delaying loading of
