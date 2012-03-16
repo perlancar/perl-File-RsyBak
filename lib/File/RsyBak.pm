@@ -506,11 +506,6 @@ Finally, TARGET/hist3.<timestamp1> will be deleted after
 TARGET/hist3.<timestamp85> comes along.
 
 
-=head1 FUNCTIONS
-
-None of the functions are exported by default, but they are exportable.
-
-
 =head1 HISTORY
 
 The idea for this module came out in 2006 as part of the Spanel hosting control
