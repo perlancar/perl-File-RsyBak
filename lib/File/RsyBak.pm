@@ -153,9 +153,9 @@ _
 
     deps => {
         all => [
-            {exec=>'nice'},
-            {exec=>'rsync'}, # XXX not needed if backup=0
-            {exec=>'rm'},    # XXX not needed if rotate=0
+            {prog => 'nice'},
+            {prog => 'rsync'}, # XXX not needed if backup=0
+            {prog => 'rm'},    # XXX not needed if rotate=0
         ],
     },
 };
