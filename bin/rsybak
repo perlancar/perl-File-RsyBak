@@ -1,8 +1,5 @@
 #!/usr/bin/perl
 
-# workaround for dzil
-package rsybak;
-
 use 5.010;
 use strict;
 use warnings;
@@ -14,6 +11,7 @@ Perinci::CmdLine->new(url => '/File/RsyBak/backup')->run;
 
 1;
 # ABSTRACT: Backup files/directories with histories, using rsync
+# PODNAME: rsybak
 
 =head1 DESCRIPTION
 
