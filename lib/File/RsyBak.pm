@@ -1,6 +1,6 @@
 package File::RsyBak;
 
-use 5.010;
+use 5.010001;
 use strict;
 use warnings;
 use Log::Any '$log';
@@ -577,4 +577,3 @@ snapshots), created in as early as 2004 (or earlier) by Mike Heins. Do check it
 out. I wish I had found it first before reinventing it in 2006 :-)
 
 =cut
-
