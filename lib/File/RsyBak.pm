@@ -142,7 +142,8 @@ _
     examples => [
         {
             argv         => ['/home/steven/mydata','/backup/steven/mydata'],
-            description => <<'_',
+            test         => 0,
+            description  => <<'_',
 
 Backup /home/steven/mydata to /backup/steven/mydata using the default number of
 histories ([-7, 4, 3]).
