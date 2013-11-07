@@ -368,6 +368,50 @@ Or, just use the provided script from the command-line:
 
  % rsybak --source /path/to/mydata --target /backup/mydata
 
+Example resulting backup (after several runs so that backup history has
+accumulated):
+
+ % ls /path/to/mydata
+ myfile
+ anotherfile
+ mydir/
+
+ % ls -l /backup/mydata
+ current/
+ hist.2013-10-31@12:04:17+00/
+ hist.2013-11-01@12:09:31+00/
+ hist.2013-11-02@12:09:41+00t/
+ hist.2013-11-03@12:15:02+00/
+ hist.2013-11-04@12:13:19+00/
+ hist.2013-11-05@12:11:31+00/
+ hist2.2013-10-08@12:07:50+00/
+ hist2.2013-10-15@12:06:03+00/
+ hist2.2013-10-21@12:02:42+00/
+ hist2.2013-10-27@12:06:25+00t/
+ hist3.2013-06-25@12:15:39+00/
+ hist3.2013-08-31@12:05:31+00/
+ hist3.2013-10-02@12:05:57+00/
+
+Each directory under C</backup/mydata> is a "snapshot" backup of
+C</path/to/mydata>:
+
+ % ls -l /backup/mydata/current/
+ myfile
+ anotherfile
+ mydir/
+
+ % ls -l /backup/mydata/hist.2013-10-31@12:04:17+00/
+ myfile
+ anotherfile
+ mydir/
+
+ % ls -l /backup/mydata/hist3.2013-10-02@12:05:57+00/
+ myfile
+ anotherfile
+ mydir/
+ someoldfile
+
+
 =head1 DESCRIPTION
 
 This module is basically just a wrapper around B<rsync> to create a filesystem
@@ -518,7 +562,8 @@ with millions of files, backup process often took 12 hours or more. After
 evaluating several other solutions, we realized that nothing beats the raw
 performance of rsync. Thus we designed a simple backup system based on it.
 
-First public release of this module is in Feb 2011.
+First public release of this module is in Feb 2011. I have since used this
+script in various production servers as well as personal PCs/laptops.
 
 
 =head1 FAQ
