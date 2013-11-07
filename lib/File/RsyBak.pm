@@ -372,12 +372,12 @@ Or, just use the provided script from the command-line:
 Example resulting backup (after several runs so that backup history has
 accumulated):
 
- % ls /path/to/mydata
+ % ls /path/to/mydata/
  myfile
  anotherfile
  mydir/
 
- % ls -l /backup/mydata
+ % ls /backup/mydata/
  current/
  hist.2013-10-31@12:04:17+00/
  hist.2013-11-01@12:09:31+00/
@@ -396,17 +396,17 @@ accumulated):
 Each directory under C</backup/mydata> is a "snapshot" backup of
 C</path/to/mydata>:
 
- % ls -l /backup/mydata/current/
+ % ls /backup/mydata/current/
  myfile
  anotherfile
  mydir/
 
- % ls -l /backup/mydata/hist.2013-10-31@12:04:17+00/
+ % ls /backup/mydata/hist.2013-10-31@12:04:17+00/
  myfile
  anotherfile
  mydir/
 
- % ls -l /backup/mydata/hist3.2013-10-02@12:05:57+00/
+ % ls /backup/mydata/hist3.2013-10-02@12:05:57+00/
  myfile
  anotherfile
  mydir/
