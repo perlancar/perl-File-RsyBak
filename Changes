@@ -1,5 +1,12 @@
 Revision history for File-RsyBak
 
+0.20    2014-05-17 (SHARYANTO)
+
+        - No functional changes.
+
+        - Replace File::Slurp with File::Slurp::Tiny.
+
+
 0.19    2013-11-07 (SHARYANTO)
 
         - No functional changes. Show sample backup directory structure in

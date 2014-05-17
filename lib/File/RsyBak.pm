@@ -68,22 +68,30 @@ sub _check_sources {
 }
 
 $SPEC{backup} = {
+    v             => 1.1,
     summary       =>
         'Backup files/directories with histories, using rsync',
     args          => {
-        source           => ['any*'   => {
-            of           => ['str*', ['array*' => {of=>'str*'}]],
+        source           => {
             summary      => 'Director(y|ies) to backup',
-            arg_pos      => 0,
-        }],
-        target           => ['str*'   => {
+            schema       => ['any*'   => {
+                of => ['str*', ['array*' => {of=>'str*'}]]
+            }],
+            req          => 1,
+            pos          => 0,
+        },
+        target           => {
             summary      => 'Backup destination',
-            arg_pos      => 1,
-        }],
-        histories        => ['array' => {
-            of           => 'int*',
-            default      => [-7, 4, 3],
+            schema       => ['str*'   => {}],
+            req          => 1,
+            pos          => 1,
+        },
+        histories        => {
             summary      => 'Histories/history levels',
+            schema       => ['array' => {
+                default      => [-7, 4, 3],
+                of           => 'int*',
+            }],
             description  => <<'_',
 
 Specifies number of backup histories to keep for level 1, 2, and so on. If
@@ -91,10 +99,11 @@ number is negative, specifies number of days to keep instead (regardless of
 number of histories).
 
 _
-        }],
-        extra_dir        => ['bool'   => {
+        },
+        extra_dir        => {
             summary      =>
                 'Whether to force creation of source directory in target',
+            schema       => ['bool'   => {}],
             description  => <<'_',
 
 If set to 1, then backup(source => '/a', target => '/backup/a') will create
@@ -106,29 +115,35 @@ is a single directory. You can set this to 1 to so that behaviour when there is
 a single source is the same as behaviour when there are several sources.
 
 _
-        }],
-        backup           => [bool     => {
-            default      => 1,
+        },
+        backup           => {
             summary      => 'Whether to do backup or not',
+            schema       => [bool     => {
+                default      => 1,
+            }],
             description  => <<'_',
 
 If backup=1 and rotate=0 then will only create new backup without rotating
 histories.
 
 _
-        }],
-        rotate           => [bool     => {
-            default      => 1,
+        },
+        rotate           => {
             summary      => 'Whether to do rotate after backup or not',
+            schema       => [bool     => {
+                default      => 1,
+            }],
             description  => <<'_',
 
 If backup=0 and rotate=1 then will only do history rotating.
 
 _
-        }],
-        extra_rsync_opts => [array    => {
-            of           => 'str*',
+        },
+        extra_rsync_opts => {
             summary      => 'Pass extra options to rsync command',
+            schema       => [array    => {
+                of           => 'str*',
+            }],
             description  => <<'_',
 
 Extra options to pass to rsync command when doing backup. Note that the options
@@ -136,7 +151,7 @@ will be shell quoted, , so you should pass it unquoted, e.g. ['--exclude',
 '/Program Files'].
 
 _
-        }],
+        },
     },
 
     examples => [
@@ -271,7 +286,6 @@ sub _backup {
 
     $log->infof("Finished backup %s ==> %s", $sources, $target);
 }
-
 
 sub _rotate {
     require String::ShellQuote; String::ShellQuote->import;
