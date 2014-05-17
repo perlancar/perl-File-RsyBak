@@ -1,5 +1,4 @@
 #!perl
-#!perl -T
 
 use 5.010;
 use strict;
@@ -16,7 +15,7 @@ if (!which("rsync")) {
 use File::Temp     qw(tempdir);
 use File::Which    qw(which);
 use File::RsyBak   qw(backup);
-use File::Slurp;
+use File::Slurp::Tiny qw(write_file);
 use String::ShellQuote;
 
 my $tmpdir = tempdir(CLEANUP => 1);
