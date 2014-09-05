@@ -74,9 +74,10 @@ $SPEC{backup} = {
     args          => {
         source           => {
             summary      => 'Director(y|ies) to backup',
-            schema       => ['any*'   => {
-                of => ['str*', ['array*' => {of=>'str*'}]]
-            }],
+            #schema       => ['any*'   => {
+            #    of => ['str*', ['array*' => {of=>'str*'}]]
+            #}],
+            schema       => 'str*', # temp, because in pericmd when specifying as arg#0, there is a warning of JSON decoding failure
             req          => 1,
             pos          => 0,
         },
