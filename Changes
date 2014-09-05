@@ -1,5 +1,13 @@
 Revision history for File-RsyBak
 
+0.22     2014-09-05 (PERLANCAR)
+
+         - No functional changes.
+
+         - Workaround to avoid JSON decoding failure warning when run by
+           Perinci::CmdLine.
+
+
 0.21     2014-08-16 (SHARYANTO) - Happy 19th CPAN Day!
 
          - [build] CLI scripts are now generated automatically using
