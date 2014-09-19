@@ -157,11 +157,11 @@ _
 
     examples => [
         {
-            argv         => ['/home/steven/mydata','/backup/steven/mydata'],
+            argv         => ['/home/jajang/mydata','/backup/jajang/mydata'],
             test         => 0,
             description  => <<'_',
 
-Backup /home/steven/mydata to /backup/steven/mydata using the default number of
+Backup /home/jajang/mydata to /backup/jajang/mydata using the default number of
 histories ([-7, 4, 3]).
 
 _
