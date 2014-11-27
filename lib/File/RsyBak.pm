@@ -469,8 +469,6 @@ on those platforms.
 
 =back
 
-This module uses Log::Any logging framework.
-
 
 =head1 HOW IT WORKS
 
