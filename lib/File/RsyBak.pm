@@ -1,5 +1,8 @@
 package File::RsyBak;
 
+# DATE
+# VERSION
+
 use 5.010001;
 use strict;
 use warnings;
@@ -10,8 +13,6 @@ use File::chdir;
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(backup);
-
-# VERSION
 
 our %SPEC;
 
@@ -367,7 +368,7 @@ sub _rotate {
 }
 
 1;
-# ABSTRACT: Backup files/directories with histories, using rsync
+# ABSTRACT:
 
 =head1 SYNOPSIS
 
