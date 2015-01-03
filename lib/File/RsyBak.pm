@@ -621,11 +621,6 @@ Or alternatively, you can backup on SRC-HOST locally first, then send the
 resulting backup to BAK-HOST.
 
 
-=head1 TODO
-
-* Allow ionice etc instead of just nice -n19
-
-
 =head1 SEE ALSO
 
 L<File::Backup>
