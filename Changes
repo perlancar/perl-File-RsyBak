@@ -1,5 +1,14 @@
 Revision history for File-RsyBak
 
+0.24    2015-03-18 (PERLANCAR)
+
+	- No functional changes.
+
+        - [dist] Rebuild with newer DZP:Rinci::ScriptFromFunc so it now has
+          prereq to Perinci::CmdLine::Classic instead of the old name
+          Perinci::CmdLine, so I can purge Perinci::CmdLine from CPAN.
+
+
 0.23    2015-01-03 (PERLANCAR)
 
 	- No functional changes.
