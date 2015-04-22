@@ -379,11 +379,24 @@ From your Perl program:
      source    => '/path/to/mydata',
      target    => '/backup/mydata',
      histories => [-7, 4, 3],         # 7 days, 4 weeks, 3 months
+     extra_rsync_opts => [qw/--exclude Cache --exclude cache --exclude tmp --exclude temp/],
  );
 
 Or, just use the provided script from the command-line:
 
- % rsybak --source /path/to/mydata --target /backup/mydata
+ % rsybak --source /path/to/mydata --target /backup/mydata --extra-rsync-opts-json '["--exclude","Cache","--exclude","cache","--exclude","tmp","--exclude","temp"]'
+
+Or, if you have this configuration in C</etc/rsybak.conf> or <~/rsybak.conf>:
+
+ [system]
+ source = /path/to/mydata
+ target = /backup/mydata
+ ; also specify as JSON
+ extra_rsync_opts = ["--exclude","Cache","--exclude","cache","--exclude","tmp","--exclude","temp"]
+
+you can just run:
+
+ % rsybak --config-profile system
 
 Example resulting backup (after several runs so that backup history has
 accumulated):
