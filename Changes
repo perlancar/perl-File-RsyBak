@@ -1,5 +1,13 @@
 Revision history for File-RsyBak
 
+0.25    2015-04-22 (PERLANCAR)
+
+	- No functional changes.
+
+	- [Documentation] Give example of how to use
+	  --extra-rsync-opts-json and the configuration file.
+
+
 0.24    2015-03-18 (PERLANCAR)
 
 	- No functional changes.
