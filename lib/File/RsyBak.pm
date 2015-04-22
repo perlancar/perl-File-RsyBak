@@ -386,7 +386,7 @@ Or, just use the provided script from the command-line:
 
  % rsybak --source /path/to/mydata --target /backup/mydata --extra-rsync-opts-json '["--exclude","Cache","--exclude","cache","--exclude","tmp","--exclude","temp"]'
 
-Or, if you have this configuration in C</etc/rsybak.conf> or <~/rsybak.conf>:
+Or, if you have this configuration in C</etc/rsybak.conf> or C<~/rsybak.conf>:
 
  [system]
  source = /path/to/mydata
