@@ -1,5 +1,10 @@
 Revision history for File-RsyBak
 
+0.26    2015-08-17 (PERLANCAR)
+
+	- Switch from Log::Any to Log::Any::IfLOG.
+
+
 0.25    2015-04-22 (PERLANCAR)
 
 	- No functional changes.
