@@ -1,0 +1,19 @@
+#!perl
+
+# DATE
+# DIST
+# VERSION
+
+use 5.010001;
+use strict;
+use warnings;
+
+require Perinci::CmdLine::Classic;
+
+Perinci::CmdLine::Classic->new(
+    url => "/File/RsyBak/backup",
+    program_name => "rsybak",
+)->run;
+
+# ABSTRACT: Backup files/directories with histories, using rsync
+# PODNAME: rsybak
