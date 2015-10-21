@@ -1,5 +1,13 @@
 Revision history for File-RsyBak
 
+0.28    2015-10-21 (PERLANCAR)
+
+	[Experimental changes]
+
+        - Make rsybak a packed script, so the number of prereqs for this dist is
+          significantly reduced. This eases installation.
+
+
 0.27    2015-09-03 (PERLANCAR)
 
 	- No functional changes.
