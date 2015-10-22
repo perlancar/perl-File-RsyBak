@@ -178,7 +178,7 @@ _
     },
 };
 sub backup {
-    require File::Flock;
+    require File::Flock::Retry;
     require File::Path;
     require File::Which;
 
@@ -211,10 +211,9 @@ sub backup {
                 "$target->{abs_path}: $!"];
     }
 
+    my $lock = File::Flock::Retry->lock("$target->{abs_path}/.lock");
     return [409, "Error: Can't lock $target->{abs_path}/.lock, ".
-                "perhaps another backup process is running"]
-        unless File::Flock::lock("$target->{abs_path}/.lock", undef,
-                                 "nonblocking");
+                "perhaps another backup process is running"];
 
     if ($backup) {
         _backup(
