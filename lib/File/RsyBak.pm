@@ -212,8 +212,6 @@ sub backup {
     }
 
     my $lock = File::Flock::Retry->lock("$target->{abs_path}/.lock");
-    return [409, "Error: Can't lock $target->{abs_path}/.lock, ".
-                "perhaps another backup process is running"];
 
     if ($backup) {
         _backup(
