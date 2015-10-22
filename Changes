@@ -1,5 +1,14 @@
 Revision history for File-RsyBak
 
+0.29    2015-10-22 (PERLANCAR)
+
+        - No functional changes.
+
+        - [Bugfix] Fix dependencies (File::RsyBak didn't work, only rsybak CLI).
+
+        - Replace File::Flock with the more lightweight File::Flock::Retry.
+
+
 0.28    2015-10-21 (PERLANCAR)
 
 	[Experimental changes]
