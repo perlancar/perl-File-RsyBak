@@ -226,8 +226,6 @@ sub backup {
         _rotate($target->{abs_path}, $histories);
     }
 
-    File::Flock::unlock("$target->{abs_path}/.lock");
-
     [200, "OK"];
 }
 
