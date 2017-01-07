@@ -1,5 +1,3 @@
-Revision history for File-RsyBak
-
 0.30    2015-10-29 (PERLANCAR)
 
 	- [dist][Bugfix] Include a YAML implementation (YAML-Old) because
