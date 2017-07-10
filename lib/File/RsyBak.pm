@@ -243,7 +243,7 @@ sub _backup {
         ($opts->{extra_rsync_opts} ? map { shell_quote($_), " " }
              @{$opts->{extra_rsync_opts}} : ()),
         "-a --del --force --ignore-errors --ignore-existing ",
-        ($log->is_debug ? "-v " : ""),
+        (log_is_debug() ? "-v " : ""),
         ((-e "$target->{abs_path}/current") ?
              "--link-dest ".shell_quote("$target->{abs_path}/current")." "
                  : ""),
