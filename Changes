@@ -1,3 +1,12 @@
+0.32    2017-07-10 (PERLANCAR)
+
+	- No functional changes.
+
+	- [test] Replace File::Slurp::Tiny with File::Slurper.
+
+	- Replace Log::Any with Log::ger.
+
+
 0.31    2017-02-03 (PERLANCAR)
 
 	- [ux] Use rsync option -v (--verbose) when under debug/trace
