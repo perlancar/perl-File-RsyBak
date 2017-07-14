@@ -8,10 +8,11 @@ use 5.010001;
 use strict;
 use warnings;
 
-require Perinci::CmdLine::Classic;
+require Perinci::CmdLine::Lite;
 
-Perinci::CmdLine::Classic->new(
+Perinci::CmdLine::Lite->new(
     url => "/File/RsyBak/backup",
+    log => 1,
     program_name => "rsybak",
 )->run;
 
