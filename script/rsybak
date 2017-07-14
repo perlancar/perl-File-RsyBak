@@ -14,6 +14,7 @@ Perinci::CmdLine::Lite->new(
     url => "/File/RsyBak/backup",
     log => 1,
     program_name => "rsybak",
+    per_arg_yaml => 1,
 )->run;
 
 # ABSTRACT: Backup files/directories with histories, using rsync
