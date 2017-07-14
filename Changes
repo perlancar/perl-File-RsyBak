@@ -1,3 +1,10 @@
+0.34    2017-07-14 (PERLANCAR)
+
+	- [Regression] Previous release did not recognize per_arg_yaml
+	  because it defaults to off in Perinci::CmdLine::Lite and needs to
+	  be explicitly turned on.
+
+
 0.33    2017-07-14 (PERLANCAR)
 
 	- No functional changes.
