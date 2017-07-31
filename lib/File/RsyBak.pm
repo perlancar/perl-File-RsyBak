@@ -160,6 +160,7 @@ _
         {
             argv         => ['/home/jajang/mydata','/backup/jajang/mydata'],
             test         => 0,
+            'x.doc.show_result' => 0,
             description  => <<'_',
 
 Backup /home/jajang/mydata to /backup/jajang/mydata using the default number of
