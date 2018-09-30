@@ -241,14 +241,14 @@ sub _backup {
     $cmd = join(
         "",
         "nice -n19 rsync ",
-        ($opts->{extra_rsync_opts} ? map { shell_quote($_), " " }
+        ($opts->{extra_rsync_opts} ? map { (shell_quote($_), " ") }
              @{$opts->{extra_rsync_opts}} : ()),
         "-a --del --force --ignore-errors --ignore-existing ",
         (log_is_debug() ? "-v " : ""),
         ((-e "$target->{abs_path}/current") ?
              "--link-dest ".shell_quote("$target->{abs_path}/current")." "
                  : ""),
-        map({ shell_quote($_->{raw}), ($opts->{extra_dir} ? "" : "/"), " " }
+        map({ (shell_quote($_->{raw}), ($opts->{extra_dir} ? "" : "/"), " ") }
                 @$sources),
         shell_quote("$target->{abs_path}/.tmp/"),
     );
