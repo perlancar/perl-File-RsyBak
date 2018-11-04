@@ -483,7 +483,7 @@ on those platforms.
 
 =head1 HOW IT WORKS
 
-=head2 First-time backup
+=head2 First-time backup (when TARGET does not yet exist)
 
 First, we lock target directory to prevent other backup process from
 interfering:
@@ -498,8 +498,8 @@ Then we copy source to temporary directory:
 If copy finishes successfully, we rename temporary directory to final directory
 'current':
 
- rename   TARGET/.tmp    TARGET/current
  touch    TARGET/.current.timestamp
+ rename   TARGET/.tmp    TARGET/current
 
 If copy fails in the middle, TARGET/.tmp will still be lying around and the next
 backup run will just continue the rsync process:
@@ -512,7 +512,8 @@ Finally, we remove lock:
 
 =head2 Subsequent backups (after TARGET/current exists)
 
-First, we lock target directory to prevent other backup process to interfere:
+First, we lock target directory to prevent other backup process from
+interfering:
 
  flock    TARGET/.lock
 
@@ -523,8 +524,10 @@ Then we rsync source to target directory (using --link-dest=TARGET/current):
 If rsync finishes successfully, we rename target directories:
 
  rename   TARGET/current TARGET/hist.<timestamp>
- rename   TARGET/.tmp    TARGET/current
  touch    TARGET/.current.timestamp
+ rename   TARGET/.tmp    TARGET/current
+
+where <timestamp> is the mtime of TARGET/.current.timestamp file.
 
 If rsync fails in the middle, TARGET/.tmp will be lying around and the next
 backup run will just continue the rsync process.
