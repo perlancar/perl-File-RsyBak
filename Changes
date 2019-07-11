@@ -1,4 +1,4 @@
-0.361   2019-03-11 (PERLANCAR)
+0.361   2019-03-11  Released-By: PERLANCAR
 
         - No functional changes.
 
@@ -6,14 +6,14 @@
           coerce modules).
 
 
-0.360   2018-09-30 (PERLANCAR)
+0.360   2018-09-30  Released-By: PERLANCAR
 
 	- No functional changes.
 
 	- [build] Rebuild to update packed modules.
 
 
-0.35    2017-07-31 (PERLANCAR)
+0.35    2017-07-31  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -21,14 +21,14 @@
 	  Synopsis.
 
 
-0.34    2017-07-14 (PERLANCAR)
+0.34    2017-07-14  Released-By: PERLANCAR
 
 	- [Regression] Previous release did not recognize per_arg_yaml
 	  because it defaults to off in Perinci::CmdLine::Lite and needs to
 	  be explicitly turned on.
 
 
-0.33    2017-07-14 (PERLANCAR)
+0.33    2017-07-14  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -36,7 +36,7 @@
 	  configuration.
 
 
-0.32    2017-07-10 (PERLANCAR)
+0.32    2017-07-10  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -45,19 +45,19 @@
 	- Replace Log::Any with Log::ger.
 
 
-0.31    2017-02-03 (PERLANCAR)
+0.31    2017-02-03  Released-By: PERLANCAR
 
 	- [ux] Use rsync option -v (--verbose) when under debug/trace
 	  logging.
 
 
-0.30    2015-10-29 (PERLANCAR)
+0.30    2015-10-29  Released-By: PERLANCAR
 
 	- [dist][Bugfix] Include a YAML implementation (YAML-Old) because
 	  YAML-Any does not depend on one.
 
 
-0.29    2015-10-22 (PERLANCAR)
+0.29    2015-10-22  Released-By: PERLANCAR
 
         - No functional changes.
 
@@ -66,7 +66,7 @@
         - Replace File::Flock with the more lightweight File::Flock::Retry.
 
 
-0.28    2015-10-21 (PERLANCAR)
+0.28    2015-10-21  Released-By: PERLANCAR
 
 	[Experimental changes]
 
@@ -74,7 +74,7 @@
           significantly reduced. This eases installation.
 
 
-0.27    2015-09-03 (PERLANCAR)
+0.27    2015-09-03  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -83,12 +83,12 @@
 	  requirement.
 
 
-0.26    2015-08-17 (PERLANCAR)
+0.26    2015-08-17  Released-By: PERLANCAR
 
 	- Switch from Log::Any to Log::Any::IfLOG.
 
 
-0.25    2015-04-22 (PERLANCAR)
+0.25    2015-04-22  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -96,7 +96,7 @@
 	  --extra-rsync-opts-json and the configuration file.
 
 
-0.24    2015-03-18 (PERLANCAR)
+0.24    2015-03-18  Released-By: PERLANCAR
 
 	- No functional changes.
 
@@ -105,14 +105,14 @@
           Perinci::CmdLine, so I can purge Perinci::CmdLine from CPAN.
 
 
-0.23    2015-01-03 (PERLANCAR)
+0.23    2015-01-03  Released-By: PERLANCAR
 
 	- No functional changes.
 
 	- Rebuild (Generate TODO.md).
 
 
-0.22     2014-09-05 (PERLANCAR)
+0.22     2014-09-05  Released-By: PERLANCAR
 
          - No functional changes.
 
@@ -127,26 +127,26 @@
            generated script is not as polished as it should be. Stay tuned.
 
 
-0.20    2014-05-17 (SHARYANTO)
+0.20    2014-05-17  Released-By: SHARYANTO
 
         - No functional changes.
 
         - Replace File::Slurp with File::Slurp::Tiny.
 
 
-0.19    2013-11-07 (SHARYANTO)
+0.19    2013-11-07  Released-By: SHARYANTO
 
         - No functional changes. Show sample backup directory structure in
           Synopsis.
 
 
-0.18    2012-03-16 (SHARYANTO)
+0.18    2012-03-16  Released-By: SHARYANTO
 
         - No functional changes. Rebuild with Pod::Weaver::Plugin::Perinci
           enabled.
 
 
-0.17    2012-03-03 (SHARYANTO)
+0.17    2012-03-03  Released-By: SHARYANTO
 
         - No functional changes. Reduce startup overhead by delaying loading of
           modules (measured on my Atom N570 netbook: from 0.15s to 0.06s). This
@@ -154,13 +154,13 @@
           Perinci::BashComplete on this module.
 
 
-0.16    2012-03-02 (SHARYANTO)
+0.16    2012-03-02  Released-By: SHARYANTO
 
         - No functional changes. Replace Sub::Spec::CmdLine with
           Perinci::CmdLine.
 
 
-0.15    2011-05-27 (SHARYANTO)
+0.15    2011-05-27  Released-By: SHARYANTO
 
         [BUG FIXES]
 
@@ -168,40 +168,40 @@
           history backup dir name, it should be after.
 
 
-0.14    2011-02-28 (SHARYANTO)
+0.14    2011-02-28  Released-By: SHARYANTO
 
         - Spec: add 'deps' clause to nice/rsync/rm execs.
 
         - Require newer version of Sub::Spec::CmdLine.
 
 
-0.13    2011-02-22 (SHARYANTO)
+0.13    2011-02-22  Released-By: SHARYANTO
 
         - Update to latest Sub::Spec (%SUBS -> %SPEC).
 
 
-0.12    2011-02-16 (SHARYANTO)
+0.12    2011-02-16  Released-By: SHARYANTO
 
         - Reduce startup overhead (avoid loading Log::Any::App) when invoked for
           bash completion.
 
 
-0.11    2011-02-15 (SHARYANTO)
+0.11    2011-02-15  Released-By: SHARYANTO
 
         - Fix tests.
 
 
-0.10    2011-02-15 (SHARYANTO)
+0.10    2011-02-15  Released-By: SHARYANTO
 
         - Do not die in backup(), return error response instead.
 
 
-0.09    2011-02-15 (SHARYANTO)
+0.09    2011-02-15  Released-By: SHARYANTO
 
         - Fix sub spec (--histories is optional).
 
 
-0.08    2011-02-15 (SHARYANTO)
+0.08    2011-02-15  Released-By: SHARYANTO
 
         - Rename from File-CRBackup -> File-RsyBak.
 
@@ -210,28 +210,28 @@
         - Allow remote sources.
 
 
-0.07    2011-02-11 (SHARYANTO)
+0.07    2011-02-11  Released-By: SHARYANTO
 
         - Fix POD.
 
 
-0.06    2011-02-10 (SHARYANTO)
+0.06    2011-02-10  Released-By: SHARYANTO
 
         - Add POD documentation for functions (using
           Pod::Weaver::Plugin::SubSpec).
 
 
-0.05    2011-02-09 (SHARYANTO)
+0.05    2011-02-09  Released-By: SHARYANTO
 
         - Add missing dependencies for script 'crbackup'.
 
 
-0.04    2011-02-09 (SHARYANTO)
+0.04    2011-02-09  Released-By: SHARYANTO
 
         - Some small fixes and update to newer version of Sub::Spec::CmdLine.
 
 
-0.03    2011-02-09 (SHARYANTO)
+0.03    2011-02-09  Released-By: SHARYANTO
 
         - Add script: crbackup.
 
@@ -240,11 +240,11 @@
         - Fix missing dependencies/use statements.
 
 
-0.02    2011-02-05 (SHARYANTO)
+0.02    2011-02-05  Released-By: SHARYANTO
 
         - Add arguments: extra_cp_opts, extra_rsync_opts
 
 
-0.01    2011-02-04 (SHARYANTO)
+0.01    2011-02-04  Released-By: SHARYANTO
 
         - First release.
