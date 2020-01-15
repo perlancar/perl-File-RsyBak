@@ -120,7 +120,7 @@
            Perinci::CmdLine.
 
 
-0.21     2014-08-16 (SHARYANTO) - Happy 19th CPAN Day!
+0.21     2014-08-16  Released-By: SHARYANTO; Note: Happy 19th CPAN Day!
 
          - [build] CLI scripts are now generated automatically using
            Dist::Zilla::Plugin::ScriptFromFunc. The plugin is still at 0.01 so the
@@ -248,3 +248,4 @@
 0.01    2011-02-04  Released-By: SHARYANTO
 
         - First release.
+
